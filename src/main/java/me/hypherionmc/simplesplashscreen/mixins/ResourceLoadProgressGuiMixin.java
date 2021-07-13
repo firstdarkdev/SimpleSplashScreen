@@ -216,10 +216,10 @@ public class ResourceLoadProgressGuiMixin {
             int customWidth = CustomSplashScreen.CS_CONFIG.customProgressBarMode == CustomSplashScreenConfig.ProgressBarMode.Linear ? x2 - x1 : i;
             if (CS_CONFIG.customProgressBarBackground) {
                 this.mc.getTextureManager().bindTexture(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE);
-                blit(matrixStack, x1, y1, 0, 0, 6, x2 - x1, y2 - y1, 10, customWidth);
+                blit(matrixStack, x1, y1, 0, 0, 0, x2 - x1, y2 - y1, 10, x2 - x1);
             }
             this.mc.getTextureManager().bindTexture(CUSTOM_PROGRESS_BAR_TEXTURE);
-            blit(matrixStack, x1, y1, 0, 0, 6, i, y2 - y1, 10, customWidth);
+            blit(matrixStack, x1, y1, 0, 0, 0, i, y2 - y1, 10, customWidth);
         }
 
         // Vanilla / With Color progress bar
