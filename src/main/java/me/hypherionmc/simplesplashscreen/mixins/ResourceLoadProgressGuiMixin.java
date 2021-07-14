@@ -15,6 +15,8 @@ import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -28,6 +30,7 @@ import java.util.function.Consumer;
 import static net.minecraft.client.gui.AbstractGui.blit;
 import static net.minecraft.client.gui.AbstractGui.fill;
 
+@OnlyIn(Dist.CLIENT)
 @Mixin(ResourceLoadProgressGui.class)
 public class ResourceLoadProgressGuiMixin {
 

@@ -1,4 +1,3 @@
-import net.minecraftforge.gradle.common.task.SignJar
 buildscript {
     repositories {
         maven {
@@ -17,6 +16,7 @@ buildscript {
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'eclipse'
 
 group = 'me.hypherionmc'
 version = '1.0'
@@ -120,15 +120,6 @@ jar {
 }
 
 jar.finalizedBy('reobfJar')
-
-/*task signJar(type: SignJar, dependsOn: reobfJar) {
-    inputFile = jar.archivePath
-    outputFile = jar.archivePath
-    keyStore = 'ssc.jks'
-    alias = 'signFiles'
-    storePass = System.getenv('SSC_PASS')
-    keyPass = System.getenv('SSC_PASS')
-}*/
 
 mixin {
     add sourceSets.main, "simplesplashscreen.refmap.json"
