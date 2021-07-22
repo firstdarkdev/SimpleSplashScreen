@@ -4,6 +4,8 @@
   "compatibilityLevel": "JAVA_8",
   "refmap": "simplesplashscreen.refmap.json",
   "mixins": [
+  ],
+  "client": [
     "ResourceLoadProgressGuiMixin"
   ],
   "minVersion": "0.8"
