@@ -13,9 +13,7 @@ logoFile="logo_light.png" #optional
 credits="Thanks to Motschen who made the original Fabric version of this mod" #optional
 authors="HypherionSA" #optional
 description = '''
-This mod allows you to completely change the minecraft splash screen.
-
-Provides many config options, so you can customize the loading screen to your liking
+A mod that allows you to customize the Minecraft Loading Screen to your liking
 '''
 
 [[dependencies.simplesplashscreen]] #optional

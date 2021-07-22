@@ -17,10 +17,11 @@ buildscript {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
+apply plugin: 'signing'
 
 group = 'me.hypherionmc'
 version = project.modversion
-archivesBaseName = 'SimpleSplashScreen'
+archivesBaseName = 'SimpleSplashScreen-1.16.5'
 
 // Jenkins
 if (System.getenv('BUILD_NUMBER') != null) {
@@ -120,6 +121,27 @@ jar {
 }
 
 jar.finalizedBy('reobfJar')
+
+task signJar << {
+
+    if (System.getenv('release') != null && System.getenv('release') == "true") {
+        System.print("Signing Jar for Release")
+        ant.signjar(
+                destDir: "build/libs/",
+                jar: 'build/libs/*.jar',
+                alias: 'signFiles',
+                storetype: "jks",
+                keystore: "ssc.jks",
+                storepass: System.getenv('SSC_PASS'),
+                keypass: System.getenv('SSC_PASS'),
+                verbose: true,
+                preservelastmodified: "true"
+        )
+    }
+
+}
+
+build.dependsOn signJar
 
 mixin {
     add sourceSets.main, "simplesplashscreen.refmap.json"
