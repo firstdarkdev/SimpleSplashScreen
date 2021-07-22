@@ -58,13 +58,35 @@ public class CustomSplashScreenConfig implements ConfigData {
     public enum ProgressBarType {
         Vanilla, BossBar, Custom, Hidden;
     }
+
     public enum LogoStyle {
         Mojang, Aspect1to1, Hidden;
     }
+
     public enum ProgressBarMode {
         Linear, Stretch;
     }
+
     public enum BossBarType {
         PROGRESS, NOTCHED_6, NOTCHED_10, NOTCHED_12, NOTCHED_20;
+    }
+
+    public CustomSplashScreenConfig() {
+
+    }
+
+    // Preparation for Live Preview
+    public CustomSplashScreenConfig(boolean showProgressText, ProgressBarType progressBarType, LogoStyle logoStyle, boolean backgroundImage, int backgroundColor, int progressBarColor, int progressFrameColor, ProgressBarMode progressBarMode, boolean customProgressBarBackground, BossBarType bossBarType, Textures textures) {
+        this.showProgressText = showProgressText;
+        this.progressBarType = progressBarType;
+        this.logoStyle = logoStyle;
+        this.backgroundImage = backgroundImage;
+        this.backgroundColor = backgroundColor;
+        this.progressBarColor = progressBarColor;
+        this.progressFrameColor = progressFrameColor;
+        this.customProgressBarMode = progressBarMode;
+        this.customProgressBarBackground = customProgressBarBackground;
+        this.bossBarType = bossBarType;
+        this.textures = textures;
     }
 }

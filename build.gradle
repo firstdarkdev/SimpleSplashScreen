@@ -19,7 +19,7 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 
 group = 'me.hypherionmc'
-version = '1.0'
+version = project.modversion
 archivesBaseName = 'SimpleSplashScreen'
 
 // Jenkins

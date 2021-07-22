@@ -3,6 +3,7 @@ package me.hypherionmc.simplesplashscreen;
 import me.hypherionmc.simplesplashscreen.config.CustomSplashScreenConfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
+import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.fml.ExtensionPoint;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -29,12 +30,11 @@ public class CustomSplashScreen {
 
     public static CustomSplashScreenConfig CS_CONFIG;
     public static File CONFIG_PATH = new File(FMLPaths.CONFIGDIR.get() + "/simplesplashscreen");
-    private static Path BackgroundTexture = Paths.get(CONFIG_PATH + "/background.png");
-    private static Path MojangTexture = Paths.get(CONFIG_PATH + "/mojangstudios.png");
-    private static Path MojankTexture = Paths.get(CONFIG_PATH + "/mojank.png");
-    private static Path ProgressBarTexture = Paths.get(CONFIG_PATH + "/progressbar.png");
-    private static Path ProgressBarBackgroundTexture = Paths.get(CONFIG_PATH + "/progressbar_background.png");
-
+    private static final Path BackgroundTexture = Paths.get(CONFIG_PATH + "/background.png");
+    private static final Path MojangTexture = Paths.get(CONFIG_PATH + "/mojangstudios.png");
+    private static final Path MojankTexture = Paths.get(CONFIG_PATH + "/mojank.png");
+    private static final Path ProgressBarTexture = Paths.get(CONFIG_PATH + "/progressbar.png");
+    private static final Path ProgressBarBackgroundTexture = Paths.get(CONFIG_PATH + "/progressbar_background.png");
 
     public CustomSplashScreen() {
         AutoConfig.register(CustomSplashScreenConfig.class, JanksonConfigSerializer::new);
@@ -49,6 +49,7 @@ public class CustomSplashScreen {
             InputStream mojank = Thread.currentThread().getContextClassLoader().getResourceAsStream("mojank.png");
             InputStream progressbar = Thread.currentThread().getContextClassLoader().getResourceAsStream("progressbar.png");
             InputStream progressbarBG = Thread.currentThread().getContextClassLoader().getResourceAsStream("progressbar_background.png");
+
             try {
                 // Copy the default textures into the config directory //
                 Files.copy(background, BackgroundTexture, StandardCopyOption.REPLACE_EXISTING);
@@ -66,8 +67,7 @@ public class CustomSplashScreen {
     }
 
     public void clientSetup(FMLClientSetupEvent event) {
-        if (ModList.get().isLoaded("cloth-config")) {
-            ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, screen) -> AutoConfig.getConfigScreen(CustomSplashScreenConfig.class, screen).get());
-        }
+        ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, screen) -> AutoConfig.getConfigScreen(CustomSplashScreenConfig.class, screen).get());
     }
+
 }
