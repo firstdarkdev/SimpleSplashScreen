@@ -16,5 +16,16 @@
 	"text.autoconfig.simplesplashscreen.option.textures.BossBarTexture": "Boss Bar Texture",
 	"text.autoconfig.simplesplashscreen.option.textures.CustomBarTexture": "Custom Progress Bar Texture",
 	"text.autoconfig.simplesplashscreen.option.textures.CustomBarBackgroundTexture": "Custom Progress Bar Background Texture",
-	"text.autoconfig.simplesplashscreen.option.textures.BackgroundTexture": "Background Texture"
+	"text.autoconfig.simplesplashscreen.option.textures.BackgroundTexture": "Background Texture",
+	"text.autoconfig.simplesplashscreen.tooltip.showProgressText": "Enable/Disable the forge progress text shown at the bottom of the screen",
+	"text.autoconfig.simplesplashscreen.tooltip.progressBarType": "Change the design of the progress bar",
+	"text.autoconfig.simplesplashscreen.tooltip.logoStyle": "Change the texture of the logo",
+	"text.autoconfig.simplesplashscreen.tooltip.backgroundImage": "Enable/Disable the background image",
+	"text.autoconfig.simplesplashscreen.tooltip.backgroundColor": "Change the color of the background",
+	"text.autoconfig.simplesplashscreen.tooltip.progressBarColor": "Change the color of the progress bar",
+	"text.autoconfig.simplesplashscreen.tooltip.progressFrameColor": "Change the color of the progress bar frame",
+	"text.autoconfig.simplesplashscreen.tooltip.customProgressBarMode": "Change the mode of the custom loading bar",
+	"text.autoconfig.simplesplashscreen.tooltip.customProgressBarBackground": "Enable/Disable the custom progress bar background",
+	"text.autoconfig.simplesplashscreen.tooltip.bossBarType": "Change the style of the boss loading bar",
+	"text.autoconfig.simplesplashscreen.button.preview": "Preview Changes"
 }
