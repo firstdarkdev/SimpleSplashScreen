@@ -6,7 +6,7 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Comment;
 
 @Config(name = "simplesplashscreen")
-public class CustomSplashScreenConfig implements ConfigData {
+public class SimpleSplashScreenConfig implements ConfigData {
 
     @Comment(value = "Enable/Disable the forge progress text shown at the bottom of the screen")
     public boolean showProgressText = true;
@@ -25,9 +25,11 @@ public class CustomSplashScreenConfig implements ConfigData {
     @Comment(value = "Change the color of the background")
     @ConfigEntry.ColorPicker
     public int backgroundColor = 15675965;
+
     @Comment(value = "Change the color of the progress bar")
     @ConfigEntry.ColorPicker
     public int progressBarColor = 16777215;
+
     @Comment(value = "Change the color of the progress bar frame")
     @ConfigEntry.ColorPicker
     public int progressFrameColor = 16777215;
@@ -71,12 +73,9 @@ public class CustomSplashScreenConfig implements ConfigData {
         PROGRESS, NOTCHED_6, NOTCHED_10, NOTCHED_12, NOTCHED_20;
     }
 
-    public CustomSplashScreenConfig() {
+    public SimpleSplashScreenConfig() {}
 
-    }
-
-    // Preparation for Live Preview
-    public CustomSplashScreenConfig(boolean showProgressText, ProgressBarType progressBarType, LogoStyle logoStyle, boolean backgroundImage, int backgroundColor, int progressBarColor, int progressFrameColor, ProgressBarMode progressBarMode, boolean customProgressBarBackground, BossBarType bossBarType, Textures textures) {
+    public SimpleSplashScreenConfig(boolean showProgressText, ProgressBarType progressBarType, LogoStyle logoStyle, boolean backgroundImage, int backgroundColor, int progressBarColor, int progressFrameColor, ProgressBarMode progressBarMode, boolean customProgressBarBackground, BossBarType bossBarType, Textures textures) {
         this.showProgressText = showProgressText;
         this.progressBarType = progressBarType;
         this.logoStyle = logoStyle;
@@ -89,4 +88,5 @@ public class CustomSplashScreenConfig implements ConfigData {
         this.bossBarType = bossBarType;
         this.textures = textures;
     }
+
 }

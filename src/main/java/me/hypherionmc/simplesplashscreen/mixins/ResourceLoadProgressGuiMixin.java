@@ -2,7 +2,7 @@ package me.hypherionmc.simplesplashscreen.mixins;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
-import me.hypherionmc.simplesplashscreen.config.CustomSplashScreenConfig;
+import me.hypherionmc.simplesplashscreen.config.SimpleSplashScreenConfig;
 import me.hypherionmc.simplesplashscreen.textures.BlurredConfigTexture;
 import me.hypherionmc.simplesplashscreen.textures.ConfigTexture;
 import me.hypherionmc.simplesplashscreen.textures.EmptyTexture;
@@ -24,7 +24,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import static me.hypherionmc.simplesplashscreen.CustomSplashScreen.CS_CONFIG;
+import static me.hypherionmc.simplesplashscreen.SimpleSplashScreen.CS_CONFIG;
 import static net.minecraft.client.gui.AbstractGui.blit;
 import static net.minecraft.client.gui.AbstractGui.fill;
 
@@ -41,16 +41,24 @@ public class ResourceLoadProgressGuiMixin {
     @Shadow @Final private IAsyncReloader asyncReloader;
 
     private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation("empty.png");
-    private static final ResourceLocation MOJANG_TEXTURE = new ResourceLocation(CS_CONFIG.textures.MojangLogo);
-    private static final ResourceLocation ASPECT_1to1_TEXTURE = new ResourceLocation(CS_CONFIG.textures.Aspect1to1Logo);
-    private static final ResourceLocation BOSS_BAR_TEXTURE = new ResourceLocation(CS_CONFIG.textures.BossBarTexture);
-    private static final ResourceLocation CUSTOM_PROGRESS_BAR_TEXTURE = new ResourceLocation(CS_CONFIG.textures.CustomBarTexture);
-    private static final ResourceLocation CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE = new ResourceLocation(CS_CONFIG.textures.CustomBarBackgroundTexture);
-    private static final ResourceLocation BACKGROUND_TEXTURE = new ResourceLocation(CS_CONFIG.textures.BackgroundTexture);
+    private static ResourceLocation MOJANG_TEXTURE;
+    private static ResourceLocation ASPECT_1to1_TEXTURE;
+    private static ResourceLocation BOSS_BAR_TEXTURE;
+    private static ResourceLocation CUSTOM_PROGRESS_BAR_TEXTURE;
+    private static ResourceLocation CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE;
+    private static ResourceLocation BACKGROUND_TEXTURE;
 
     @Inject(at = @At("TAIL"), method = "loadLogoTexture", cancellable = true)
     private static void init(Minecraft client, CallbackInfo ci) {
-        if (CS_CONFIG.logoStyle == CustomSplashScreenConfig.LogoStyle.Mojang) {
+
+        MOJANG_TEXTURE = new ResourceLocation(CS_CONFIG.textures.MojangLogo);
+        ASPECT_1to1_TEXTURE = new ResourceLocation(CS_CONFIG.textures.Aspect1to1Logo);
+        BOSS_BAR_TEXTURE = new ResourceLocation(CS_CONFIG.textures.BossBarTexture);
+        CUSTOM_PROGRESS_BAR_TEXTURE = new ResourceLocation(CS_CONFIG.textures.CustomBarTexture);
+        CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE = new ResourceLocation(CS_CONFIG.textures.CustomBarBackgroundTexture);
+        BACKGROUND_TEXTURE = new ResourceLocation(CS_CONFIG.textures.BackgroundTexture);
+
+        if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Mojang) {
             client.getTextureManager().loadTexture(MOJANG_LOGO_TEXTURE, new BlurredConfigTexture(MOJANG_TEXTURE));
         }
         else {
@@ -122,7 +130,7 @@ public class ResourceLoadProgressGuiMixin {
 
         m = (int)((double)this.mc.getMainWindow().getScaledWidth() * 0.5D);
 
-        if (CS_CONFIG.logoStyle == CustomSplashScreenConfig.LogoStyle.Aspect1to1) {
+        if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Aspect1to1) {
 
             // The forge Progress Text breaks the custom Image Rendering, so this is a workaround to fix it
             if (CS_CONFIG.showProgressText) {
@@ -174,15 +182,15 @@ public class ResourceLoadProgressGuiMixin {
         int i = MathHelper.ceil((float)(x2 - x1 - 2) * this.progress);
 
         // Bossbar Progress Bar
-        if (CS_CONFIG.progressBarType == CustomSplashScreenConfig.ProgressBarType.BossBar) {
+        if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.BossBar) {
             this.mc.getTextureManager().bindTexture(BOSS_BAR_TEXTURE);
 
             int overlay = 0;
 
-            if (CS_CONFIG.bossBarType == CustomSplashScreenConfig.BossBarType.NOTCHED_6) {overlay = 93;}
-            else if (CS_CONFIG.bossBarType == CustomSplashScreenConfig.BossBarType.NOTCHED_10) {overlay = 105;}
-            else if (CS_CONFIG.bossBarType == CustomSplashScreenConfig.BossBarType.NOTCHED_12) {overlay = 117;}
-            else if (CS_CONFIG.bossBarType == CustomSplashScreenConfig.BossBarType.NOTCHED_20) {overlay = 129;}
+            if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_6) {overlay = 93;}
+            else if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_10) {overlay = 105;}
+            else if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_12) {overlay = 117;}
+            else if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_20) {overlay = 129;}
 
             int bbWidth = (int) ((x2 - x1+1) * 1.4f);
             int bbHeight = (y2 - y1) * 30;
@@ -200,7 +208,7 @@ public class ResourceLoadProgressGuiMixin {
         }
 
         // Custom Progress Bar
-        if (CS_CONFIG.progressBarType == CustomSplashScreenConfig.ProgressBarType.Custom) {
+        if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.Custom) {
 
             // The forge Progress Text breaks the custom Image Rendering, so this is a workaround to fix it
             if (CS_CONFIG.showProgressText) {
@@ -209,7 +217,7 @@ public class ResourceLoadProgressGuiMixin {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0f);
             }
 
-            int customWidth = CS_CONFIG.customProgressBarMode == CustomSplashScreenConfig.ProgressBarMode.Linear ? x2 - x1 : i;
+            int customWidth = CS_CONFIG.customProgressBarMode == SimpleSplashScreenConfig.ProgressBarMode.Linear ? x2 - x1 : i;
 
             if (CS_CONFIG.customProgressBarBackground) {
                 this.mc.getTextureManager().bindTexture(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE);
@@ -222,7 +230,7 @@ public class ResourceLoadProgressGuiMixin {
         }
 
         // Vanilla / With Color progress bar
-        if (CS_CONFIG.progressBarType == CustomSplashScreenConfig.ProgressBarType.Vanilla) {
+        if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.Vanilla) {
             int j = Math.round(opacity * 255.0F);
             int k = CS_CONFIG.progressBarColor | j << 24;
             int kk = CS_CONFIG.progressFrameColor | j << 24;
