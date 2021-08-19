@@ -30,11 +30,11 @@ public class SimpleSplashScreen {
     public static SimpleSplashScreenConfig CS_CONFIG;
     public static File CONFIG_PATH = new File(FMLPaths.CONFIGDIR.get() + "/simplesplashscreen");
 
-    private static final Path BackgroundTexture = Paths.get(CONFIG_PATH + "/background.png");
-    private static final Path MojangTexture = Paths.get(CONFIG_PATH + "/mojangstudios.png");
-    private static final Path MojankTexture = Paths.get(CONFIG_PATH + "/mojank.png");
-    private static final Path ProgressBarTexture = Paths.get(CONFIG_PATH + "/progressbar.png");
-    private static final Path ProgressBarBackgroundTexture = Paths.get(CONFIG_PATH + "/progressbar_background.png");
+    public static final Path BackgroundTexture = Paths.get(CONFIG_PATH + "/background.png");
+    public static final Path MojangTexture = Paths.get(CONFIG_PATH + "/mojangstudios.png");
+    public static final Path MojankTexture = Paths.get(CONFIG_PATH + "/mojank.png");
+    public static final Path ProgressBarTexture = Paths.get(CONFIG_PATH + "/progressbar.png");
+    public static final Path ProgressBarBackgroundTexture = Paths.get(CONFIG_PATH + "/progressbar_background.png");
 
     public SimpleSplashScreen() {
         LOGGER.info("Registering Config...");

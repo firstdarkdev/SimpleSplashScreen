@@ -3,11 +3,15 @@ package me.hypherionmc.simplesplashscreen.mixins;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.hypherionmc.simplesplashscreen.config.SimpleSplashScreenConfig;
-import me.hypherionmc.simplesplashscreen.textures.BlurredConfigTexture;
-import me.hypherionmc.simplesplashscreen.textures.ConfigTexture;
-import me.hypherionmc.simplesplashscreen.textures.EmptyTexture;
+import me.hypherionmc.simplesplashscreen.textures.*;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.LoadingGui;
 import net.minecraft.client.gui.ResourceLoadProgressGui;
+import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.WorldVertexBufferUploader;
+import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.resources.IAsyncReloader;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
@@ -48,6 +52,8 @@ public class ResourceLoadProgressGuiMixin {
     private static ResourceLocation CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE;
     private static ResourceLocation BACKGROUND_TEXTURE;
 
+    private static GifTextureRenderer gifBackground, gifLogo, gifLoader;
+
     @Inject(at = @At("TAIL"), method = "loadLogoTexture", cancellable = true)
     private static void init(Minecraft client, CallbackInfo ci) {
 
@@ -58,16 +64,36 @@ public class ResourceLoadProgressGuiMixin {
         CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE = new ResourceLocation(CS_CONFIG.textures.CustomBarBackgroundTexture);
         BACKGROUND_TEXTURE = new ResourceLocation(CS_CONFIG.textures.BackgroundTexture);
 
+        gifLogo = null;
+        gifBackground = null;
+
         if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Mojang) {
             client.getTextureManager().loadTexture(MOJANG_LOGO_TEXTURE, new BlurredConfigTexture(MOJANG_TEXTURE));
         }
         else {
             client.getTextureManager().loadTexture(MOJANG_LOGO_TEXTURE, new EmptyTexture(EMPTY_TEXTURE));
         }
-        client.getTextureManager().loadTexture(ASPECT_1to1_TEXTURE, new ConfigTexture(ASPECT_1to1_TEXTURE));
-        client.getTextureManager().loadTexture(BACKGROUND_TEXTURE, new ConfigTexture(BACKGROUND_TEXTURE));
 
-        client.getTextureManager().loadTexture(CUSTOM_PROGRESS_BAR_TEXTURE, new ConfigTexture(CUSTOM_PROGRESS_BAR_TEXTURE));
+        if (ASPECT_1to1_TEXTURE.getPath().endsWith("gif")) {
+            gifLogo = new GifTextureRenderer(CS_CONFIG.textures.Aspect1to1Logo, client);
+            gifLogo.registerFrames();
+        } else {
+            client.getTextureManager().loadTexture(ASPECT_1to1_TEXTURE, new ConfigTexture(ASPECT_1to1_TEXTURE));
+        }
+
+        if (BACKGROUND_TEXTURE.getPath().endsWith("gif")) {
+            gifBackground = new GifTextureRenderer(CS_CONFIG.textures.BackgroundTexture, client);
+            gifBackground.registerFrames();
+        } else {
+            client.getTextureManager().loadTexture(BACKGROUND_TEXTURE, new ConfigTexture(BACKGROUND_TEXTURE));
+        }
+
+        /*if (CUSTOM_PROGRESS_BAR_TEXTURE.getPath().endsWith("gif")) {
+            gifLoader = new GifTextureRenderer(CS_CONFIG.textures.CustomBarTexture, client);
+            gifLoader.registerFrames();
+        } else {*/
+            client.getTextureManager().loadTexture(CUSTOM_PROGRESS_BAR_TEXTURE, new ConfigTexture(CUSTOM_PROGRESS_BAR_TEXTURE));
+        //}
         client.getTextureManager().loadTexture(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE, new ConfigTexture(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE));
 
         ci.cancel();
@@ -97,14 +123,19 @@ public class ResourceLoadProgressGuiMixin {
         int maxY = this.mc.getMainWindow().getScaledHeight();
 
         if (CS_CONFIG.backgroundImage) {
-            mc.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
-            RenderSystem.enableBlend();
-            RenderSystem.alphaFunc(516, 0.0F);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
-            blit(matrixStack, 0, 0, 0, 0, 0, maxX, maxY, maxY, maxX);
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.defaultAlphaFunc();
-            RenderSystem.disableBlend();
+
+            if (gifBackground != null) {
+                gifBackground.renderNextFrame(matrixStack, maxX, maxY, o);
+            } else {
+                mc.getTextureManager().bindTexture(BACKGROUND_TEXTURE);
+                RenderSystem.enableBlend();
+                RenderSystem.alphaFunc(516, 0.0F);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
+                blit(matrixStack, 0, 0, 0, 0, 0, maxX, maxY, maxY, maxX);
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.defaultAlphaFunc();
+                RenderSystem.disableBlend();
+            }
         }
     }
 
@@ -143,14 +174,20 @@ public class ResourceLoadProgressGuiMixin {
             int r = (int)(d * 0.5D);
             double e = d * 4.0D;
             int s = (int)(e * 0.5D);
-            mc.getTextureManager().bindTexture(ASPECT_1to1_TEXTURE);
-            RenderSystem.enableBlend();
-            RenderSystem.alphaFunc(516, 0.0F);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
-            blit(matrixStack, m - (s / 2), r, s, s, 0, 0, 512, 512, 512, 512);
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.defaultAlphaFunc();
-            RenderSystem.disableBlend();
+
+            if (gifLogo != null) {
+                gifLogo.renderNextFrame(matrixStack, m - (s / 2), r, s, s, o);
+            } else {
+                mc.getTextureManager().bindTexture(ASPECT_1to1_TEXTURE);
+                RenderSystem.enableBlend();
+                RenderSystem.alphaFunc(516, 0.0F);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
+                blit(matrixStack, m - (s / 2), r, s, s, 0, 0, 512, 512, 512, 512);
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.defaultAlphaFunc();
+                RenderSystem.disableBlend();
+            }
+
         }
     }
 
@@ -217,15 +254,23 @@ public class ResourceLoadProgressGuiMixin {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0f);
             }
 
-            int customWidth = CS_CONFIG.customProgressBarMode == SimpleSplashScreenConfig.ProgressBarMode.Linear ? x2 - x1 : i;
+            /*if (gifLoader != null) {
+                double d = Math.min((double)this.mc.getMainWindow().getScaledWidth() * 0.75D, this.mc.getMainWindow().getScaledHeight()) * 0.25D;
+                int r = (int)(d * 0.5D);
+                double e = d * 4.0D;
+                int s = (int)(e * 0.5D);
+                gifLoader.renderProgressBar(matrixStack, x1 + (64 / 2), y2 - 74, 64);
+            } else {*/
+                int customWidth = CS_CONFIG.customProgressBarMode == SimpleSplashScreenConfig.ProgressBarMode.Linear ? x2 - x1 : i;
 
-            if (CS_CONFIG.customProgressBarBackground) {
-                this.mc.getTextureManager().bindTexture(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE);
-                blit(matrixStack, x1, y1, 0, 0, 0, x2 - x1, y2 - y1, 10, x2 - x1);
-            }
+                if (CS_CONFIG.customProgressBarBackground) {
+                    this.mc.getTextureManager().bindTexture(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE);
+                    blit(matrixStack, x1, y1, 0, 0, 0, x2 - x1, y2 - y1, 10, x2 - x1);
+                }
 
-            this.mc.getTextureManager().bindTexture(CUSTOM_PROGRESS_BAR_TEXTURE);
-            blit(matrixStack, x1, y1, 0, 0, 0, i, y2 - y1, 10, customWidth);
+                this.mc.getTextureManager().bindTexture(CUSTOM_PROGRESS_BAR_TEXTURE);
+                blit(matrixStack, x1, y1, 0, 0, 0, i, y2 - y1, 10, customWidth);
+            //}
 
         }
 
@@ -243,11 +288,83 @@ public class ResourceLoadProgressGuiMixin {
         }
     }
 
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setLoadingGui(Lnet/minecraft/client/gui/LoadingGui;)V"))
+    public void setLoadingGui(Minecraft minecraft, LoadingGui loadingGuiIn) {
+        this.mc.setLoadingGui((LoadingGui)null);
+        if (gifBackground != null) {
+            gifBackground.unloadAll();
+        }
+        if (gifLogo != null) {
+            gifLogo.unloadAll();
+        }
+        if (gifLoader != null) {
+            gifLoader.unloadAll();
+        }
+    }
+
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fml/client/ClientModLoader;renderProgressText()V"))
     private void renderProgressTextForge() {
         if (CS_CONFIG.showProgressText) {
             ClientModLoader.renderProgressText();
         }
+    }
+
+    private void drawCircularBar(MatrixStack stack, float x, float y, int radius)
+    {
+
+        int i;
+        int lineAmount = 100;
+
+        float twicePi = (float) (2.0f * Math.PI);
+
+        BufferBuilder bufferbuilder = Tessellator.getInstance().getBuffer();
+        RenderSystem.enableBlend();
+        RenderSystem.disableTexture();
+        RenderSystem.defaultBlendFunc();
+        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
+
+        for (i = 0; i <= lineAmount; i++) {
+            bufferbuilder.pos(stack.getLast().getMatrix(), (float) (x + (radius * Math.cos(i *  twicePi / lineAmount))), (float)(y + (radius * Math.sin(i * twicePi / lineAmount))), 0.0F).color(1, 1, 1, 1).endVertex();
+        }
+
+        bufferbuilder.finishDrawing();
+        WorldVertexBufferUploader.draw(bufferbuilder);
+        RenderSystem.enableTexture();
+        RenderSystem.disableBlend();
+
+
+
+        /*int vertices = 37;
+        float doublePi = (float) (2.0f * Math.PI);
+
+        float[] circleVerticesX = new float[vertices];
+        float[] circleVerticesY = new float[vertices];
+        float[] circleVerticesZ = new float[vertices];
+
+        for ( int i = 0; i < vertices; i++ )
+        {
+            circleVerticesX[i] = (float) (x + ( radius * Math.cos( i * doublePi / 36 ) ));
+            circleVerticesY[i] = (float) (y + ( radius * Math.sin( i * doublePi / 36 ) ));
+            circleVerticesZ[i] = 1;
+        }
+
+        float[] allCircleVertices = new float[vertices * 3];
+
+        for ( int i = 0; i < vertices; i++ )
+        {
+            allCircleVertices[i * 3] = circleVerticesX[i];
+            allCircleVertices[( i * 3 ) + 1] = circleVerticesY[i];
+            allCircleVertices[( i * 3 ) + 2] = circleVerticesZ[i];
+        }
+
+        FloatBuffer fb = FloatBuffer.allocate(allCircleVertices.length * 3);
+        fb.put(allCircleVertices);
+        fb.position(0);
+
+        glEnableClientState( GL_VERTEX_ARRAY );
+        glVertexPointer(3, GL_FLOAT, 0, fb);
+        glDrawArrays( GL_LINE_STRIP, 0, vertices );
+        glDisableClientState( GL_VERTEX_ARRAY );*/
     }
 
 }
