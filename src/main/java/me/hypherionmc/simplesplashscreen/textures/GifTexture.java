@@ -1,10 +1,10 @@
 package me.hypherionmc.simplesplashscreen.textures;
 
-import net.minecraft.client.renderer.texture.NativeImage;
+import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.client.resources.data.TextureMetadataSection;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.ResourceManager;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -26,23 +26,23 @@ public class GifTexture extends SimpleTexture {
     }
 
     @Override
-    protected TextureData getTextureData(IResourceManager resourceManager) {
+    protected TextureImage getTextureImage(ResourceManager p_118140_) {
         try {
-            TextureData texture;
+            TextureImage texture;
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             ImageIO.write(image, "png", os);
             InputStream is = new ByteArrayInputStream(os.toByteArray());
 
             try {
-                texture = new TextureData(new TextureMetadataSection(true, true), NativeImage.read(is));
+                texture = new TextureImage(new TextureMetadataSection(true, true), NativeImage.read(is));
             } finally {
                 is.close();
             }
 
             return texture;
         } catch (IOException var18) {
-            return new TextureData(var18);
+            return new TextureImage(var18);
         }
     }
 

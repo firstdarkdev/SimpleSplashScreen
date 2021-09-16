@@ -1,13 +1,15 @@
 package me.hypherionmc.simplesplashscreen.config;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.IGuiEventListener;
-import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.network.chat.Component;
 
 import java.util.Collections;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -15,14 +17,14 @@ public class ButtonConfigEntry extends AbstractConfigListEntry<Void> {
 
     private final Button button;
 
-    public ButtonConfigEntry(TranslationTextComponent fieldName, Button.IPressable onPress) {
+    public ButtonConfigEntry(Component fieldName, Button.OnPress onPress) {
         super(fieldName, false);
-        final int width = Minecraft.getInstance().fontRenderer.getStringPropertyWidth(fieldName) + 24;
+        final int width = Minecraft.getInstance().font.width(fieldName) + 24;
         button = new Button(0, 0, width, 20, fieldName, onPress);
     }
 
     @Override
-    public void render(MatrixStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
+    public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
         button.x = x + (entryWidth - button.getWidth()) / 2;
         button.y = y + (entryHeight - 20) / 2;
         button.render(matrices, mouseX, mouseY, delta);
@@ -38,7 +40,12 @@ public class ButtonConfigEntry extends AbstractConfigListEntry<Void> {
     public void save() {}
 
     @Override
-    public List<? extends IGuiEventListener> getEventListeners() {
+    public List<? extends GuiEventListener> children() {
+        return Collections.singletonList(button);
+    }
+
+    @Override
+    public List<? extends NarratableEntry> narratables() {
         return Collections.singletonList(button);
     }
 }

@@ -14,25 +14,25 @@ import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import me.shedaniel.clothconfig2.gui.entries.StringListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.ResourceLoadProgressGui;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.gui.screens.LoadingOverlay;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public class SimpleSplashScreenConfigGui {
 
     public static Screen getConfigScreen(Screen parent) {
         final ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(new TranslationTextComponent("text.autoconfig.simplesplashscreen.title"));
+                .setTitle(new TranslatableComponent("text.autoconfig.simplesplashscreen.title"));
 
         final SimpleSplashScreenConfig oldConfig = SimpleSplashScreen.CS_CONFIG;
 
-        ConfigCategory configCategory = builder.getOrCreateCategory(new TranslationTextComponent(""));
+        ConfigCategory configCategory = builder.getOrCreateCategory(new TranslatableComponent(""));
         ConfigData configData = new ConfigData(builder.entryBuilder(), configCategory);
-        configCategory.addEntry(new ButtonConfigEntry(new TranslationTextComponent("text.autoconfig.simplesplashscreen.button.preview"), button -> {
+        configCategory.addEntry(new ButtonConfigEntry(new TranslatableComponent("text.autoconfig.simplesplashscreen.button.preview"), button -> {
             SimpleSplashScreen.CS_CONFIG = configData.getConfig();
-            ResourceLoadProgressGui.loadLogoTexture(Minecraft.getInstance());
-            Minecraft.getInstance().setLoadingGui(new ReloadPreviewScreen(500, () -> SimpleSplashScreen.CS_CONFIG = oldConfig));
+            LoadingOverlay.registerTextures(Minecraft.getInstance());
+            Minecraft.getInstance().setOverlay(new ReloadPreviewScreen(500, () -> SimpleSplashScreen.CS_CONFIG = oldConfig));
         }));
 
         builder.setSavingRunnable(() -> {
@@ -49,12 +49,12 @@ public class SimpleSplashScreenConfigGui {
         return builder.build();
     }
 
-    private static TranslationTextComponent translationKey(String id) {
-        return new TranslationTextComponent("text.autoconfig.simplesplashscreen.option." + id);
+    private static TranslatableComponent translationKey(String id) {
+        return new TranslatableComponent("text.autoconfig.simplesplashscreen.option." + id);
     }
 
-    private static TranslationTextComponent tooltipTranslationKey(String id) {
-        return new TranslationTextComponent("text.autoconfig.simplesplashscreen.tooltip." + id);
+    private static TranslatableComponent tooltipTranslationKey(String id) {
+        return new TranslatableComponent("text.autoconfig.simplesplashscreen.tooltip." + id);
     }
 
     public static class ConfigData {

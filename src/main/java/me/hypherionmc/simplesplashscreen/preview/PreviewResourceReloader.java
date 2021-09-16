@@ -1,12 +1,12 @@
 package me.hypherionmc.simplesplashscreen.preview;
 
-import net.minecraft.resources.IAsyncReloader;
+import net.minecraft.server.packs.resources.ReloadInstance;
+import net.minecraft.util.Mth;
 import net.minecraft.util.Unit;
-import net.minecraft.util.math.MathHelper;
 
 import java.util.concurrent.CompletableFuture;
 
-public class PreviewResourceReloader implements IAsyncReloader {
+public class PreviewResourceReloader implements ReloadInstance {
 
     protected final long start;
     protected final long duration;
@@ -19,7 +19,7 @@ public class PreviewResourceReloader implements IAsyncReloader {
     }
 
     @Override
-    public CompletableFuture<Unit> onceDone() {
+    public CompletableFuture<Unit> done() {
         if (onDone != null) {
             onDone.run();
         }
@@ -27,22 +27,21 @@ public class PreviewResourceReloader implements IAsyncReloader {
     }
 
     @Override
-    public float estimateExecutionSpeed() {
-        return MathHelper.clamp(
+    public float getActualProgress() {
+        return Mth.clamp(
        (float) (System.currentTimeMillis() - start) / duration, 0, 1
         );
     }
 
     @Override
-    public boolean asyncPartDone() {
+    public boolean isDone() {
         return System.currentTimeMillis() - start >= duration;
     }
 
     @Override
-    public boolean fullyDone() {
-        return System.currentTimeMillis() - start >= duration;
+    public void checkExceptions() {
+
     }
 
-    @Override
-    public void join() {}
+
 }

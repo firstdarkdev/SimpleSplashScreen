@@ -4,12 +4,11 @@ buildscript {
             name = 'sponge'
             url = 'https://repo.spongepowered.org/maven'
         }
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
+        maven { url = 'https://maven.minecraftforge.net' }
         mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
     }
 }
@@ -21,7 +20,7 @@ apply plugin: 'signing'
 
 group = 'me.hypherionmc'
 version = project.modversion
-archivesBaseName = 'SimpleSplashScreen-1.16.5'
+archivesBaseName = 'SimpleSplashScreen-1.17.1'
 
 // Jenkins
 if (System.getenv('BUILD_NUMBER') != null) {
@@ -29,10 +28,10 @@ if (System.getenv('BUILD_NUMBER') != null) {
     jar.archiveName = archivesBaseName + "-dev-" + System.getenv('BUILD_NUMBER') + ".jar"
 }
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '16'
 
 minecraft {
-    mappings channel: 'snapshot', version: '20210309-1.16.5'
+    mappings channel: 'official', version: '1.17.1'
     //makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -100,8 +99,9 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.10'
-    compile(fg.deobf("me.shedaniel.cloth:cloth-config-forge:4.11.26"))
+    minecraft 'net.minecraftforge:forge:1.17.1-37.0.61'
+    implementation(fg.deobf("me.shedaniel.cloth:cloth-config-forge:5.0.38"))
+    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..
@@ -122,28 +122,14 @@ jar {
 
 jar.finalizedBy('reobfJar')
 
-task signJar << {
-
-    if (System.getenv('release') != null && System.getenv('release') == "true") {
-        System.print("Signing Jar for Release")
-        ant.signjar(
-                destDir: "build/libs/",
-                jar: 'build/libs/*.jar',
-                alias: 'signFiles',
-                storetype: "jks",
-                keystore: "ssc.jks",
-                storepass: System.getenv('SSC_PASS'),
-                keypass: System.getenv('SSC_PASS'),
-                verbose: true,
-                preservelastmodified: "true"
-        )
-    }
-
-}
-
-build.dependsOn signJar
-
 mixin {
     add sourceSets.main, "simplesplashscreen.refmap.json"
 }
 
+if (System.getProperty("idea.sync.active") == "true") {
+    afterEvaluate {
+        tasks.withType(JavaCompile).all {
+            it.options.annotationProcessorPath = files()
+        }
+    }
+}

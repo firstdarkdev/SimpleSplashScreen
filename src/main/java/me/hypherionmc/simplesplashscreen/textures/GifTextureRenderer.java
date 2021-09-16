@@ -1,11 +1,11 @@
 package me.hypherionmc.simplesplashscreen.textures;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.hypherionmc.simplesplashscreen.util.GifDecoder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SimpleTexture;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.fml.loading.FMLPaths;
 
 import java.awt.image.BufferedImage;
@@ -14,7 +14,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Random;
 
-import static net.minecraft.client.gui.AbstractGui.blit;
+import static net.minecraft.client.gui.GuiComponent.blit;
+
 
 public class GifTextureRenderer {
 
@@ -57,11 +58,11 @@ public class GifTextureRenderer {
 
     public void registerFrames() {
         frames.forEach(((location, simpleTexture) ->  {
-            mc.getTextureManager().loadTexture(new ResourceLocation(textureID + "_frame_" + location), simpleTexture);
+            mc.getTextureManager().register(new ResourceLocation(textureID + "_frame_" + location), simpleTexture);
         }));
     }
 
-    public void renderNextFrame(MatrixStack stack, int maxX, int maxY, float alpha) {
+    public void renderNextFrame(PoseStack stack, int maxX, int maxY, float alpha) {
         tick++;
         if (!frames.isEmpty()) {
 
@@ -74,18 +75,18 @@ public class GifTextureRenderer {
                 tick = 0;
             }
 
-            frames.get(currentFrame).bindTexture();
+            RenderSystem.setShaderTexture(0, new ResourceLocation(textureID + "_frame_" + currentFrame));
             RenderSystem.enableBlend();
-            RenderSystem.alphaFunc(516, 0.0F);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+            RenderSystem.blendEquation(32774);
+            RenderSystem.blendFunc(770, 1);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
             blit(stack, 0, 0, 0, 0, 0, maxX, maxY, maxY, maxX);
             RenderSystem.defaultBlendFunc();
-            RenderSystem.defaultAlphaFunc();
             RenderSystem.disableBlend();
         }
     }
 
-    public void renderNextFrame(MatrixStack stack, int maxX, int maxY, int width, int height, float alpha) {
+    public void renderNextFrame(PoseStack stack, int maxX, int maxY, int width, int height, float alpha) {
         tick++;
         if (!frames.isEmpty()) {
 
@@ -98,21 +99,20 @@ public class GifTextureRenderer {
                 tick = 0;
             }
 
-            frames.get(currentFrame).bindTexture();
-
+            RenderSystem.setShaderTexture(0, new ResourceLocation(textureID + "_frame_" + currentFrame));
             RenderSystem.enableBlend();
-            RenderSystem.alphaFunc(516, 0.0F);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+            RenderSystem.blendEquation(32774);
+            RenderSystem.blendFunc(770, 1);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
             blit(stack, maxX, maxY, width, height, 0, 0, 512, 512, 512, 512);
             RenderSystem.defaultBlendFunc();
-            RenderSystem.defaultAlphaFunc();
             RenderSystem.disableBlend();
         }
     }
 
     public void unloadAll() {
         frames.forEach(((location, simpleTexture) ->  {
-            mc.getTextureManager().deleteTexture(new ResourceLocation(textureID + "_frame_" + location));
+            mc.getTextureManager().release(new ResourceLocation(textureID + "_frame_" + location));
         }));
         frames.clear();
 
