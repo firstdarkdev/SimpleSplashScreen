@@ -10,12 +10,10 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -30,11 +28,13 @@ public class SimpleSplashScreen {
     public static SimpleSplashScreenConfig CS_CONFIG;
     public static File CONFIG_PATH = new File(FMLPaths.CONFIGDIR.get() + "/simplesplashscreen");
 
-    public static final Path BackgroundTexture = Paths.get(CONFIG_PATH + "/background.png");
-    public static final Path MojangTexture = Paths.get(CONFIG_PATH + "/mojangstudios.png");
-    public static final Path MojankTexture = Paths.get(CONFIG_PATH + "/mojank.png");
-    public static final Path ProgressBarTexture = Paths.get(CONFIG_PATH + "/progressbar.png");
-    public static final Path ProgressBarBackgroundTexture = Paths.get(CONFIG_PATH + "/progressbar_background.png");
+    private static final Path[] textures = new Path[] {
+        Paths.get(CONFIG_PATH + "/background.png"),
+        Paths.get(CONFIG_PATH + "/mojangstudios.png"),
+        Paths.get(CONFIG_PATH + "/mojank.png"),
+        Paths.get(CONFIG_PATH + "/progressbar.png"),
+        Paths.get(CONFIG_PATH + "/progressbar_background.png")
+    };
 
     public SimpleSplashScreen() {
         LOGGER.info("Registering Config...");
@@ -45,31 +45,39 @@ public class SimpleSplashScreen {
             LOGGER.info("Creating default Resources...");
             CONFIG_PATH.mkdir();
 
-            InputStream background = Thread.currentThread().getContextClassLoader().getResourceAsStream("background.png");
-            InputStream mojangstudios = Thread.currentThread().getContextClassLoader().getResourceAsStream("mojangstudios.png");
-            InputStream mojank = Thread.currentThread().getContextClassLoader().getResourceAsStream("mojank.png");
-            InputStream progressbar = Thread.currentThread().getContextClassLoader().getResourceAsStream("progressbar.png");
-            InputStream progressbarBG = Thread.currentThread().getContextClassLoader().getResourceAsStream("progressbar_background.png");
-
-            try {
-
-                Files.copy(background, BackgroundTexture, StandardCopyOption.REPLACE_EXISTING);
-                Files.copy(mojangstudios, MojangTexture, StandardCopyOption.REPLACE_EXISTING);
-                Files.copy(mojank, MojankTexture, StandardCopyOption.REPLACE_EXISTING);
-                Files.copy(progressbar, ProgressBarTexture, StandardCopyOption.REPLACE_EXISTING);
-                Files.copy(progressbarBG, ProgressBarBackgroundTexture, StandardCopyOption.REPLACE_EXISTING);
-
-            } catch (IOException e) {
-                e.printStackTrace();
+            for (Path path : textures) {
+                InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path.getFileName().toString());
+                try {
+                    Files.copy(is, path, StandardCopyOption.REPLACE_EXISTING);
+                    is.close();
+                } catch (Exception e) {
+                    LOGGER.error("Failed to load resource " + path.getFileName().toString());
+                    e.printStackTrace();
+                }
             }
-
         }
+
+        // Check that all texture names are lowercase
+        CS_CONFIG.textures.Aspect1to1Logo = renameFiles(CS_CONFIG.textures.Aspect1to1Logo);
+        CS_CONFIG.textures.BackgroundTexture = renameFiles(CS_CONFIG.textures.BackgroundTexture);
+        CS_CONFIG.textures.BossBarTexture = renameFiles(CS_CONFIG.textures.BossBarTexture);
+        CS_CONFIG.textures.CustomBarTexture = renameFiles(CS_CONFIG.textures.CustomBarTexture);
+        CS_CONFIG.textures.CustomBarBackgroundTexture = renameFiles(CS_CONFIG.textures.CustomBarBackgroundTexture);
+        CS_CONFIG.textures.MojangLogo = renameFiles(CS_CONFIG.textures.MojangLogo);
 
         FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
     }
 
     public void clientSetup(FMLClientSetupEvent event) {
         ModLoadingContext.get().registerExtensionPoint(ExtensionPoint.CONFIGGUIFACTORY, () -> (mc, screen) -> SimpleSplashScreenConfigGui.getConfigScreen(screen));
+    }
+
+    private String renameFiles(String file) {
+        File tmpfile = new File(CONFIG_PATH + "/" + file);
+        if (tmpfile.exists()) {
+            return tmpfile.renameTo(new File(CONFIG_PATH + "/" + file.toLowerCase())) ? file.toLowerCase() : file;
+        }
+        return file;
     }
 
 }

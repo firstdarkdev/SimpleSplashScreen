@@ -3,15 +3,13 @@ package me.hypherionmc.simplesplashscreen.mixins;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import me.hypherionmc.simplesplashscreen.config.SimpleSplashScreenConfig;
-import me.hypherionmc.simplesplashscreen.textures.*;
+import me.hypherionmc.simplesplashscreen.textures.BlurredConfigTexture;
+import me.hypherionmc.simplesplashscreen.textures.ConfigTexture;
+import me.hypherionmc.simplesplashscreen.textures.EmptyTexture;
+import me.hypherionmc.simplesplashscreen.textures.GifTextureRenderer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.LoadingGui;
 import net.minecraft.client.gui.ResourceLoadProgressGui;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.resources.IAsyncReloader;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.ResourceLocation;
@@ -40,7 +38,7 @@ public class ResourceLoadProgressGuiMixin {
     @Shadow @Final private Minecraft mc;
     @Shadow @Final private boolean reloading;
     @Shadow private float progress;
-    @Shadow private long fadeOutStart = -1L;
+    @Shadow private final long fadeOutStart = -1L;
     @Shadow private long fadeInStart = -1L;
     @Shadow @Final private IAsyncReloader asyncReloader;
 
@@ -307,64 +305,6 @@ public class ResourceLoadProgressGuiMixin {
         if (CS_CONFIG.showProgressText) {
             ClientModLoader.renderProgressText();
         }
-    }
-
-    private void drawCircularBar(MatrixStack stack, float x, float y, int radius)
-    {
-
-        int i;
-        int lineAmount = 100;
-
-        float twicePi = (float) (2.0f * Math.PI);
-
-        BufferBuilder bufferbuilder = Tessellator.getInstance().getBuffer();
-        RenderSystem.enableBlend();
-        RenderSystem.disableTexture();
-        RenderSystem.defaultBlendFunc();
-        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
-
-        for (i = 0; i <= lineAmount; i++) {
-            bufferbuilder.pos(stack.getLast().getMatrix(), (float) (x + (radius * Math.cos(i *  twicePi / lineAmount))), (float)(y + (radius * Math.sin(i * twicePi / lineAmount))), 0.0F).color(1, 1, 1, 1).endVertex();
-        }
-
-        bufferbuilder.finishDrawing();
-        WorldVertexBufferUploader.draw(bufferbuilder);
-        RenderSystem.enableTexture();
-        RenderSystem.disableBlend();
-
-
-
-        /*int vertices = 37;
-        float doublePi = (float) (2.0f * Math.PI);
-
-        float[] circleVerticesX = new float[vertices];
-        float[] circleVerticesY = new float[vertices];
-        float[] circleVerticesZ = new float[vertices];
-
-        for ( int i = 0; i < vertices; i++ )
-        {
-            circleVerticesX[i] = (float) (x + ( radius * Math.cos( i * doublePi / 36 ) ));
-            circleVerticesY[i] = (float) (y + ( radius * Math.sin( i * doublePi / 36 ) ));
-            circleVerticesZ[i] = 1;
-        }
-
-        float[] allCircleVertices = new float[vertices * 3];
-
-        for ( int i = 0; i < vertices; i++ )
-        {
-            allCircleVertices[i * 3] = circleVerticesX[i];
-            allCircleVertices[( i * 3 ) + 1] = circleVerticesY[i];
-            allCircleVertices[( i * 3 ) + 2] = circleVerticesZ[i];
-        }
-
-        FloatBuffer fb = FloatBuffer.allocate(allCircleVertices.length * 3);
-        fb.put(allCircleVertices);
-        fb.position(0);
-
-        glEnableClientState( GL_VERTEX_ARRAY );
-        glVertexPointer(3, GL_FLOAT, 0, fb);
-        glDrawArrays( GL_LINE_STRIP, 0, vertices );
-        glDisableClientState( GL_VERTEX_ARRAY );*/
     }
 
 }

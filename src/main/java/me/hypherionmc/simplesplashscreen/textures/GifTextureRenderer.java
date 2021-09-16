@@ -118,21 +118,4 @@ public class GifTextureRenderer {
 
     }
 
-    public void renderProgressBar(MatrixStack matrixStack, int x1, int y1, int scale) {
-        tick++;
-        if (!frames.isEmpty()) {
-
-            if (tick >= 5) {
-                if (currentFrame + 1 >= frameCount) {
-                    currentFrame = 0;
-                } else {
-                    currentFrame++;
-                }
-                tick = 0;
-            }
-
-            frames.get(currentFrame).bindTexture();
-            blit(matrixStack, x1, y1, scale, scale, 0, 0, 64, 64, 64, 64);
-        }
-    }
 }

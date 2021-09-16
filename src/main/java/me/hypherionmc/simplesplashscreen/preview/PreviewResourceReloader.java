@@ -29,7 +29,7 @@ public class PreviewResourceReloader implements IAsyncReloader {
     @Override
     public float estimateExecutionSpeed() {
         return MathHelper.clamp(
-                (float) (System.currentTimeMillis() - start) / duration, 0, 1
+       (float) (System.currentTimeMillis() - start) / duration, 0, 1
         );
     }
 
@@ -44,7 +44,5 @@ public class PreviewResourceReloader implements IAsyncReloader {
     }
 
     @Override
-    public void join() {
-
-    }
+    public void join() {}
 }
