@@ -1,5 +1,6 @@
 package me.hypherionmc.simplesplashscreen.textures;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.hypherionmc.simplesplashscreen.util.GifDecoder;
@@ -80,7 +81,7 @@ public class GifTextureRenderer {
             RenderSystem.blendEquation(32774);
             RenderSystem.blendFunc(770, 1);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
-            blit(stack, 0, 0, 0, 0, 0, maxX, maxY, maxY, maxX);
+            blit(stack, 0, 0, 0, 0, 0, maxX, maxY, maxX, maxY);
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();
         }
@@ -102,7 +103,7 @@ public class GifTextureRenderer {
             RenderSystem.setShaderTexture(0, new ResourceLocation(textureID + "_frame_" + currentFrame));
             RenderSystem.enableBlend();
             RenderSystem.blendEquation(32774);
-            RenderSystem.blendFunc(770, 1);
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
             blit(stack, maxX, maxY, width, height, 0, 0, 512, 512, 512, 512);
             RenderSystem.defaultBlendFunc();

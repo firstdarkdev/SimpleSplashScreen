@@ -14,13 +14,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.resources.ResourceLocation;;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fmlclient.ClientModLoader;
+import net.minecraftforge.client.loading.ClientModLoader;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -148,7 +148,7 @@ public class ResourceLoadProgressGuiMixin {
                 RenderSystem.blendFunc(770, 1);
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
                 RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
-                blit(matrixStack, 0, 0, 0, 0, 0, maxX, maxY, maxY, maxX);
+                blit(matrixStack, 0, 0, 0, 0, 0, maxX, maxY, maxX, maxY);
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.disableBlend();
             }
@@ -313,7 +313,7 @@ public class ResourceLoadProgressGuiMixin {
         }
     }
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/fmlclient/ClientModLoader;renderProgressText()V"))
+    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/loading/ClientModLoader;renderProgressText()V"))
     private void renderProgressTextForge() {
         if (CS_CONFIG.showProgressText) {
             ClientModLoader.renderProgressText();

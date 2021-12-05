@@ -20,7 +20,7 @@ apply plugin: 'signing'
 
 group = 'me.hypherionmc'
 version = project.modversion
-archivesBaseName = 'SimpleSplashScreen-1.17.1'
+archivesBaseName = 'SimpleSplashScreen-1.18.1'
 
 // Jenkins
 if (System.getenv('BUILD_NUMBER') != null) {
@@ -28,10 +28,10 @@ if (System.getenv('BUILD_NUMBER') != null) {
     jar.archiveName = archivesBaseName + "-dev-" + System.getenv('BUILD_NUMBER') + ".jar"
 }
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '16'
+sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
 
 minecraft {
-    mappings channel: 'official', version: '1.17.1'
+    mappings channel: 'official', version: '1.18'
     //makeObfSourceJar = false // an Srg named sources jar is made by default. uncomment this to disable.
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
@@ -99,8 +99,8 @@ repositories {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.17.1-37.0.61'
-    implementation(fg.deobf("me.shedaniel.cloth:cloth-config-forge:5.0.38"))
+    minecraft 'net.minecraftforge:forge:1.18-38.0.14'
+    implementation(fg.deobf("me.shedaniel.cloth:cloth-config-forge:6.0.43"))
     annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
 }
 
