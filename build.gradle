@@ -5,16 +5,19 @@ buildscript {
             url = 'https://repo.spongepowered.org/maven'
         }
         maven { url = 'https://maven.minecraftforge.net' }
+        maven { url = 'https://maven.parchmentmc.org' }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
+        classpath 'org.parchmentmc:librarian:1.+'
     }
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
+apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
 apply plugin: 'signing'
 
@@ -24,14 +27,13 @@ archivesBaseName = 'SimpleSplashScreen-1.18.1'
 
 // Jenkins
 if (System.getenv('BUILD_NUMBER') != null) {
-    version = "dev-" + System.getenv('BUILD_NUMBER')
-    jar.archiveName = archivesBaseName + "-dev-" + System.getenv('BUILD_NUMBER') + ".jar"
+    version = version + "." + System.getenv('BUILD_NUMBER') + "d"
 }
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
 
 minecraft {
-    mappings channel: 'official', version: '1.18'
+    mappings channel: 'parchment', version: '2022.03.06-1.18.1'
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
