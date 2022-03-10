@@ -45,6 +45,8 @@ public class ResourceLoadProgressGuiMixin {
     @Shadow private long fadeInStart = -1L;
     @Shadow @Final private ReloadInstance reload;
 
+    private int lastHeight = 0;
+
     private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation("empty.png");
     private static ResourceLocation MOJANG_TEXTURE;
     private static ResourceLocation ASPECT_1to1_TEXTURE;
@@ -53,7 +55,7 @@ public class ResourceLoadProgressGuiMixin {
     private static ResourceLocation CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE;
     private static ResourceLocation BACKGROUND_TEXTURE;
 
-    private static GifTextureRenderer gifBackground, gifLogo, gifLoader;
+    private static GifTextureRenderer gifBackground, gifLogo;
 
     @Inject(at = @At("TAIL"), method = "registerTextures", cancellable = true)
     private static void init(Minecraft client, CallbackInfo ci) {
@@ -137,7 +139,6 @@ public class ResourceLoadProgressGuiMixin {
         }
 
         if (CS_CONFIG.backgroundImage) {
-
             if (gifBackground != null) {
                 gifBackground.renderNextFrame(matrixStack, maxX, maxY, o);
             } else {
@@ -164,7 +165,6 @@ public class ResourceLoadProgressGuiMixin {
         float f = this.fadeOutStart > -1L ? (float)(l - this.fadeOutStart) / 1000.0F : -1.0F;
         float g = this.fadeInStart > -1L ? (float)(l - this.fadeInStart) / 500.0F : -1.0F;
         float o;
-        int m;
 
         if (f >= 1.0F) {
             o = 1.0F - Mth.clamp(f - 1.0F, 0.0F, 1.0F);
@@ -174,35 +174,11 @@ public class ResourceLoadProgressGuiMixin {
             o = 1.0F;
         }
 
-        m = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5D);
-
         if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Aspect1to1) {
-
-            // The forge Progress Text breaks the custom Image Rendering, so this is a workaround to fix it
-            if (CS_CONFIG.showProgressText) {
-                RenderSystem.enableTexture();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0f);
+            fixForgeOverlay();
+            if (CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Logo) {
+                renderLogo(matrixStack, o, 100);
             }
-
-            double d = Math.min((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.75D, this.minecraft.getWindow().getGuiScaledHeight()) * 0.25D;
-            int r = (int)(d * 0.5D);
-            double e = d * 4.0D;
-            int s = (int)(e * 0.5D);
-
-            if (gifLogo != null) {
-                gifLogo.renderNextFrame(matrixStack, m - (s / 2), r, s, s, o);
-            } else {
-                RenderSystem.setShaderTexture(0, ASPECT_1to1_TEXTURE);
-                RenderSystem.enableBlend();
-                RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
-                blit(matrixStack, m - (s / 2), r, s, s, 0, 0, 512, 512, 512, 512);
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.disableBlend();
-            }
-
         }
     }
 
@@ -233,82 +209,75 @@ public class ResourceLoadProgressGuiMixin {
     private void renderProgressBar(LoadingOverlay resourceLoadProgressGui, PoseStack matrixStack, int x1, int y1, int x2, int y2, float opacity) {
         int i = Mth.ceil((float)(x2 - x1 - 2) * this.currentProgress);
 
-        // Bossbar Progress Bar
-        if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.BossBar) {
-            RenderSystem.setShaderTexture(0, BOSS_BAR_TEXTURE);
+        if (CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Logo) {
+            // Bossbar Progress Bar
+            if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.BossBar) {
+                RenderSystem.setShaderTexture(0, BOSS_BAR_TEXTURE);
 
-            int overlay = 0;
+                int overlay = 0;
 
-            if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_6) {overlay = 93;}
-            else if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_10) {overlay = 105;}
-            else if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_12) {overlay = 117;}
-            else if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_20) {overlay = 129;}
+                if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_6) {overlay = 93;}
+                else if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_10) {overlay = 105;}
+                else if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_12) {overlay = 117;}
+                else if (CS_CONFIG.bossBarType == SimpleSplashScreenConfig.BossBarType.NOTCHED_20) {overlay = 129;}
 
-            int bbWidth = (int) ((x2 - x1+1) * 1.4f);
-            int bbHeight = (y2 - y1) * 30;
-            blit(matrixStack, x1, y1 + 1, 0, 0, 0, x2 - x1, (int) ((y2-y1) / 1.4f), bbHeight, bbWidth);
-            blit(matrixStack, x1, y1 + 1, 0, 0, 5f, i, (int) ((y2 - y1) / 1.4f), bbHeight, bbWidth);
+                int bbWidth = (int) ((x2 - x1+1) * 1.4f);
+                int bbHeight = (y2 - y1) * 30;
+                blit(matrixStack, x1, y1 + 1, 0, 0, 0, x2 - x1, (int) ((y2-y1) / 1.4f), bbHeight, bbWidth);
+                blit(matrixStack, x1, y1 + 1, 0, 0, 5f, i, (int) ((y2 - y1) / 1.4f), bbHeight, bbWidth);
 
-            RenderSystem.enableBlend();
-            RenderSystem.blendEquation(32774);
-            RenderSystem.blendFunc(770, 1);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            if (overlay != 0) {
-                blit(matrixStack, x1, y1 + 1, 0, 0, overlay, x2 - x1, (int) ((y2 - y1) / 1.4f), bbHeight, bbWidth);
-            }
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.disableBlend();
-        }
-
-        // Custom Progress Bar
-        if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.Custom) {
-
-            // The forge Progress Text breaks the custom Image Rendering, so this is a workaround to fix it
-            if (CS_CONFIG.showProgressText) {
-                RenderSystem.enableTexture();
-                RenderSystem.defaultBlendFunc();
+                RenderSystem.enableBlend();
+                RenderSystem.blendEquation(32774);
+                RenderSystem.blendFunc(770, 1);
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0f);
+                if (overlay != 0) {
+                    blit(matrixStack, x1, y1 + 1, 0, 0, overlay, x2 - x1, (int) ((y2 - y1) / 1.4f), bbHeight, bbWidth);
+                }
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.disableBlend();
             }
 
-            int customWidth = CS_CONFIG.customProgressBarMode == SimpleSplashScreenConfig.ProgressBarMode.Linear ? x2 - x1 : i;
+            // Custom Progress Bar
+            if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.Custom) {
 
-            if (CS_CONFIG.customProgressBarBackground) {
-                RenderSystem.setShaderTexture(0, CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE);
-                blit(matrixStack, x1, y1, 0, 0, 0, x2 - x1, y2 - y1, 10, x2 - x1);
+                fixForgeOverlay();
+                int customWidth = CS_CONFIG.customProgressBarMode == SimpleSplashScreenConfig.ProgressBarMode.Linear ? x2 - x1 : i;
+
+                if (CS_CONFIG.customProgressBarBackground) {
+                    RenderSystem.setShaderTexture(0, CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE);
+                    blit(matrixStack, x1, y1, 0, 0, 0, x2 - x1, y2 - y1, 10, x2 - x1);
+                }
+
+                RenderSystem.setShaderTexture(0, CUSTOM_PROGRESS_BAR_TEXTURE);
+                RenderSystem.setShader(GameRenderer::getPositionTexShader);
+                blit(matrixStack, x1, y1, 0, 0, 0, i, y2 - y1, 10, customWidth);
             }
 
-            RenderSystem.setShaderTexture(0, CUSTOM_PROGRESS_BAR_TEXTURE);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            blit(matrixStack, x1, y1, 0, 0, 0, i, y2 - y1, 10, customWidth);
+            // Vanilla / With Color progress bar
+            if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.Vanilla) {
+                int j = Math.round(opacity * 255.0F);
+                int k = CS_CONFIG.progressBarColor | j << 24;
+                int kk = CS_CONFIG.progressFrameColor | j << 24;
 
-        }
-
-        // Vanilla / With Color progress bar
-        if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.Vanilla) {
-            int j = Math.round(opacity * 255.0F);
-            int k = CS_CONFIG.progressBarColor | j << 24;
-            int kk = CS_CONFIG.progressFrameColor | j << 24;
-
-            fill(matrixStack, x1 + 2, y1 + 2, x1 + i, y2 - 2, k);
-            fill(matrixStack, x1 + 1, y1, x2 - 1, y1 + 1, kk);
-            fill(matrixStack, x1 + 1, y2, x2 - 1, y2 - 1, kk);
-            fill(matrixStack, x1, y1, x1 + 1, y2, kk);
-            fill(matrixStack, x2, y1, x2 - 1, y2, kk);
+                fill(matrixStack, x1 + 2, y1 + 2, x1 + i, y2 - 2, k);
+                fill(matrixStack, x1 + 1, y1, x2 - 1, y1 + 1, kk);
+                fill(matrixStack, x1 + 1, y2, x2 - 1, y2 - 1, kk);
+                fill(matrixStack, x1, y1, x1 + 1, y2, kk);
+                fill(matrixStack, x2, y1, x2 - 1, y2, kk);
+            }
+        } else {
+            renderLogo(matrixStack, 1.0F, currentProgress);
         }
     }
 
     @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"))
     public void setLoadingGui(Minecraft minecraft, Overlay loadingGuiIn) {
-        this.minecraft.setOverlay((Overlay)null);
+        this.minecraft.setOverlay(null);
         if (gifBackground != null) {
             gifBackground.unloadAll();
         }
         if (gifLogo != null) {
             gifLogo.unloadAll();
-        }
-        if (gifLoader != null) {
-            gifLoader.unloadAll();
         }
     }
 
@@ -322,8 +291,7 @@ public class ResourceLoadProgressGuiMixin {
     private static int getBackgroundColor() {
         if (CS_CONFIG.backgroundImage) {
             return FastColor.ARGB32.color(0, 0, 0, 0);
-        }
-        else {
+        } else {
             return SimpleSplashScreen.CS_CONFIG.backgroundColor;
         }
     }
@@ -332,4 +300,36 @@ public class ResourceLoadProgressGuiMixin {
         return getBackgroundColor() | alpha << 24;
     }
 
+    private void renderLogo(PoseStack matrixStack, float o, float currentProgress) {
+        double d = Math.min((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.75D, this.minecraft.getWindow().getGuiScaledHeight()) * 0.25D;
+        int m = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5D);
+        int r = (int)(d * 0.5D);
+        double e = d * 4.0D;
+        int s = (int)(e * 0.5D);
+        lastHeight = Math.max(Math.round(currentProgress * 512), lastHeight);
+        int prog = (int) (((float) lastHeight / 512) * s);
+
+        if (gifLogo != null) {
+            gifLogo.renderNextFrame(matrixStack, m - (s / 2), (r + s) - prog, s, s, o, lastHeight);
+        } else {
+            RenderSystem.setShaderTexture(0, ASPECT_1to1_TEXTURE);
+            RenderSystem.enableBlend();
+            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
+            blit(matrixStack, m - (s / 2), (r + s) - prog, s, s, 0, 512 - lastHeight, 512, 512, 512, 512);
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.disableBlend();
+        }
+    }
+
+    private void fixForgeOverlay() {
+        // The forge Progress Text breaks the custom Image Rendering, so this is a workaround to fix it
+        if (CS_CONFIG.showProgressText) {
+            RenderSystem.enableTexture();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0f);
+        }
+    }
 }

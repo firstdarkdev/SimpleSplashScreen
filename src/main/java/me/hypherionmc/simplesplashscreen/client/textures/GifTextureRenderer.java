@@ -86,7 +86,7 @@ public class GifTextureRenderer {
         }
     }
 
-    public void renderNextFrame(PoseStack stack, int maxX, int maxY, int width, int height, float alpha) {
+    public void renderNextFrame(PoseStack stack, int maxX, int maxY, int width, int height, float alpha, int clip) {
         tick++;
         if (!frames.isEmpty()) {
 
@@ -104,7 +104,7 @@ public class GifTextureRenderer {
             RenderSystem.blendEquation(32774);
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
-            blit(stack, maxX, maxY, width, height, 0, 0, 512, 512, 512, 512);
+            blit(stack, maxX, maxY, width, height, 0, 512 - clip, 512, 512, 512, 512);
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();
         }

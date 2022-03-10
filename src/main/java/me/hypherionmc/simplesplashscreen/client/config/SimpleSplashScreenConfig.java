@@ -58,7 +58,7 @@ public class SimpleSplashScreenConfig implements ConfigData {
     }
 
     public enum ProgressBarType {
-        Vanilla, BossBar, Custom, Hidden;
+        Vanilla, BossBar, Custom, Logo, Hidden;
     }
 
     public enum LogoStyle {
