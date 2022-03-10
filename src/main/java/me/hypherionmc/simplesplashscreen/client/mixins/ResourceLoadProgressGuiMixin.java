@@ -1,14 +1,14 @@
-package me.hypherionmc.simplesplashscreen.mixins;
+package me.hypherionmc.simplesplashscreen.client.mixins;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.hypherionmc.simplesplashscreen.SimpleSplashScreen;
-import me.hypherionmc.simplesplashscreen.config.SimpleSplashScreenConfig;
-import me.hypherionmc.simplesplashscreen.textures.BlurredConfigTexture;
-import me.hypherionmc.simplesplashscreen.textures.ConfigTexture;
-import me.hypherionmc.simplesplashscreen.textures.EmptyTexture;
-import me.hypherionmc.simplesplashscreen.textures.GifTextureRenderer;
+import me.hypherionmc.simplesplashscreen.client.config.SimpleSplashScreenConfig;
+import me.hypherionmc.simplesplashscreen.client.textures.BlurredConfigTexture;
+import me.hypherionmc.simplesplashscreen.client.textures.ConfigTexture;
+import me.hypherionmc.simplesplashscreen.client.textures.EmptyTexture;
+import me.hypherionmc.simplesplashscreen.client.textures.GifTextureRenderer;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LoadingOverlay;
@@ -70,8 +70,7 @@ public class ResourceLoadProgressGuiMixin {
 
         if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Mojang) {
             client.getTextureManager().register(MOJANG_STUDIOS_LOGO_LOCATION, new BlurredConfigTexture(MOJANG_TEXTURE));
-        }
-        else {
+        } else {
             client.getTextureManager().register(MOJANG_STUDIOS_LOGO_LOCATION, new EmptyTexture(EMPTY_TEXTURE));
         }
 

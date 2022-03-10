@@ -1,4 +1,4 @@
-package me.hypherionmc.simplesplashscreen.config;
+package me.hypherionmc.simplesplashscreen.client.config;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.shedaniel.clothconfig2.api.AbstractConfigListEntry;

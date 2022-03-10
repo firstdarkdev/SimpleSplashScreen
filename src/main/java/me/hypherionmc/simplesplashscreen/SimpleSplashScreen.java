@@ -1,7 +1,7 @@
 package me.hypherionmc.simplesplashscreen;
 
-import me.hypherionmc.simplesplashscreen.config.SimpleSplashScreenConfig;
-import me.hypherionmc.simplesplashscreen.config.SimpleSplashScreenConfigGui;
+import me.hypherionmc.simplesplashscreen.client.config.SimpleSplashScreenConfig;
+import me.hypherionmc.simplesplashscreen.client.config.SimpleSplashScreenConfigGui;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.minecraftforge.client.ConfigGuiHandler;
@@ -79,5 +79,4 @@ public class SimpleSplashScreen {
         }
         return file;
     }
-
 }

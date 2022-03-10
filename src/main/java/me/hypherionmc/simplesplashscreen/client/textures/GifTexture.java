@@ -1,4 +1,4 @@
-package me.hypherionmc.simplesplashscreen.textures;
+package me.hypherionmc.simplesplashscreen.client.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;

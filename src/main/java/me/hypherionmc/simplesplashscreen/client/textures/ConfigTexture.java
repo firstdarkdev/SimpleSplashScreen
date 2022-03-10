@@ -1,4 +1,4 @@
-package me.hypherionmc.simplesplashscreen.textures;
+package me.hypherionmc.simplesplashscreen.client.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
@@ -11,9 +11,9 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class BlurredConfigTexture extends SimpleTexture {
+public class ConfigTexture extends SimpleTexture {
 
-    public BlurredConfigTexture(ResourceLocation location) {
+    public ConfigTexture(ResourceLocation location) {
         super(location);
     }
 
@@ -34,4 +34,5 @@ public class BlurredConfigTexture extends SimpleTexture {
             return new TextureImage(var18);
         }
     }
+
 }

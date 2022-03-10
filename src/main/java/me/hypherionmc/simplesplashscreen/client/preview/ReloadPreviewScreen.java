@@ -1,4 +1,4 @@
-package me.hypherionmc.simplesplashscreen.preview;
+package me.hypherionmc.simplesplashscreen.client.preview;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LoadingOverlay;

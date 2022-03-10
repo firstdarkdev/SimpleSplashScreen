@@ -1,24 +1,26 @@
-package me.hypherionmc.simplesplashscreen.textures;
+package me.hypherionmc.simplesplashscreen.client.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraftforge.fml.loading.FMLPaths;
 
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class EmptyTexture extends SimpleTexture {
+public class BlurredConfigTexture extends SimpleTexture {
 
-    public EmptyTexture(ResourceLocation location) {
+    public BlurredConfigTexture(ResourceLocation location) {
         super(location);
     }
 
     @Override
     protected TextureImage getTextureImage(ResourceManager p_118140_) {
         try {
-            InputStream input = Thread.currentThread().getContextClassLoader().getResourceAsStream("empty.png");
+            InputStream input = new FileInputStream(FMLPaths.CONFIGDIR.get() + "/simplesplashscreen/" + this.location.toString().replace("minecraft:", ""));
             TextureImage texture;
 
             try {
@@ -32,5 +34,4 @@ public class EmptyTexture extends SimpleTexture {
             return new TextureImage(var18);
         }
     }
-
 }

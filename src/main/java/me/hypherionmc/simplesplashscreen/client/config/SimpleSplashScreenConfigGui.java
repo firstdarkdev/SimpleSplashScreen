@@ -1,7 +1,7 @@
-package me.hypherionmc.simplesplashscreen.config;
+package me.hypherionmc.simplesplashscreen.client.config;
 
 import me.hypherionmc.simplesplashscreen.SimpleSplashScreen;
-import me.hypherionmc.simplesplashscreen.preview.ReloadPreviewScreen;
+import me.hypherionmc.simplesplashscreen.client.preview.ReloadPreviewScreen;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.serializer.ConfigSerializer;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;

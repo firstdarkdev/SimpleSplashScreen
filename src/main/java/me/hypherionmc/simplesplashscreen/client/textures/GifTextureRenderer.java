@@ -1,9 +1,9 @@
-package me.hypherionmc.simplesplashscreen.textures;
+package me.hypherionmc.simplesplashscreen.client.textures;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import me.hypherionmc.simplesplashscreen.util.GifDecoder;
+import me.hypherionmc.simplesplashscreen.client.util.GifDecoder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.texture.SimpleTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -16,7 +16,6 @@ import java.util.HashMap;
 import java.util.Random;
 
 import static net.minecraft.client.gui.GuiComponent.blit;
-
 
 public class GifTextureRenderer {
 
@@ -116,7 +115,5 @@ public class GifTextureRenderer {
             mc.getTextureManager().release(new ResourceLocation(textureID + "_frame_" + location));
         }));
         frames.clear();
-
     }
-
 }

@@ -1,4 +1,4 @@
-package me.hypherionmc.simplesplashscreen.preview;
+package me.hypherionmc.simplesplashscreen.client.preview;
 
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.util.Mth;
@@ -29,7 +29,7 @@ public class PreviewResourceReloader implements ReloadInstance {
     @Override
     public float getActualProgress() {
         return Mth.clamp(
-       (float) (System.currentTimeMillis() - start) / duration, 0, 1
+        (float) (System.currentTimeMillis() - start) / duration, 0, 1
         );
     }
 
@@ -42,6 +42,4 @@ public class PreviewResourceReloader implements ReloadInstance {
     public void checkExceptions() {
 
     }
-
-
 }
