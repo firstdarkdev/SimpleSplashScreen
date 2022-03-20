@@ -9,6 +9,7 @@
 	"text.autoconfig.simplesplashscreen.option.progressFrameColor": "Progress Bar Frame Color",
 	"text.autoconfig.simplesplashscreen.option.customProgressBarMode": "Custom Progress Bar Mode",
 	"text.autoconfig.simplesplashscreen.option.customProgressBarBackground": "Custom Progress Bar Background",
+	"text.autoconfig.simplesplashscreen.option.logoProgressReversed": "Reverse Logo Animation",
 	"text.autoconfig.simplesplashscreen.option.bossBarType": "Boss Bar Style",
 	"text.autoconfig.simplesplashscreen.option.textures": "Texture Locations",
 	"text.autoconfig.simplesplashscreen.option.textures.MojangLogo": "Mojang Logo",

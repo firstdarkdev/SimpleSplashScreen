@@ -41,6 +41,9 @@ public class SimpleSplashScreenConfig implements ConfigData {
     @Comment(value = "Enable/Disable the custom progress bar background")
     public boolean customProgressBarBackground = false;
 
+    @Comment(value = "Reverse the Logo loading animation")
+    public boolean logoProgressReversed = false;
+
     @Comment(value = "Change the style of the boss loading bar")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     public BossBarType bossBarType = BossBarType.NOTCHED_6;
@@ -75,7 +78,7 @@ public class SimpleSplashScreenConfig implements ConfigData {
 
     public SimpleSplashScreenConfig() {}
 
-    public SimpleSplashScreenConfig(boolean showProgressText, ProgressBarType progressBarType, LogoStyle logoStyle, boolean backgroundImage, int backgroundColor, int progressBarColor, int progressFrameColor, ProgressBarMode progressBarMode, boolean customProgressBarBackground, BossBarType bossBarType, Textures textures) {
+    public SimpleSplashScreenConfig(boolean showProgressText, ProgressBarType progressBarType, LogoStyle logoStyle, boolean backgroundImage, int backgroundColor, int progressBarColor, int progressFrameColor, ProgressBarMode progressBarMode, boolean customProgressBarBackground, boolean logoProgressReversed, BossBarType bossBarType, Textures textures) {
         this.showProgressText = showProgressText;
         this.progressBarType = progressBarType;
         this.logoStyle = logoStyle;
@@ -85,6 +88,7 @@ public class SimpleSplashScreenConfig implements ConfigData {
         this.progressFrameColor = progressFrameColor;
         this.customProgressBarMode = progressBarMode;
         this.customProgressBarBackground = customProgressBarBackground;
+        this.logoProgressReversed = logoProgressReversed;
         this.bossBarType = bossBarType;
         this.textures = textures;
     }

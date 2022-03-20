@@ -14,24 +14,25 @@ import me.shedaniel.clothconfig2.gui.entries.EnumListEntry;
 import me.shedaniel.clothconfig2.gui.entries.StringListEntry;
 import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.LoadingOverlay;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.client.gui.ResourceLoadProgressGui;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class SimpleSplashScreenConfigGui {
 
     public static Screen getConfigScreen(Screen parent) {
         final ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(new TranslatableComponent("text.autoconfig.simplesplashscreen.title"));
+                .setTitle(new TranslationTextComponent("text.autoconfig.simplesplashscreen.title"));
 
         final SimpleSplashScreenConfig oldConfig = SimpleSplashScreen.CS_CONFIG;
 
-        ConfigCategory configCategory = builder.getOrCreateCategory(new TranslatableComponent(""));
+        ConfigCategory configCategory = builder.getOrCreateCategory(new TranslationTextComponent(""));
         ConfigData configData = new ConfigData(builder.entryBuilder(), configCategory);
-        configCategory.addEntry(new ButtonConfigEntry(new TranslatableComponent("text.autoconfig.simplesplashscreen.button.preview"), button -> {
+        configCategory.addEntry(new ButtonConfigEntry(new TranslationTextComponent("text.autoconfig.simplesplashscreen.button.preview"), button -> {
             SimpleSplashScreen.CS_CONFIG = configData.getConfig();
-            LoadingOverlay.registerTextures(Minecraft.getInstance());
+            ResourceLoadProgressGui.registerTextures(Minecraft.getInstance());
             Minecraft.getInstance().setOverlay(new ReloadPreviewScreen(500, () -> SimpleSplashScreen.CS_CONFIG = oldConfig));
         }));
 
@@ -49,12 +50,12 @@ public class SimpleSplashScreenConfigGui {
         return builder.build();
     }
 
-    private static TranslatableComponent translationKey(String id) {
-        return new TranslatableComponent("text.autoconfig.simplesplashscreen.option." + id);
+    private static ITextComponent translationKey(String id) {
+        return new TranslationTextComponent("text.autoconfig.simplesplashscreen.option." + id);
     }
 
-    private static TranslatableComponent tooltipTranslationKey(String id) {
-        return new TranslatableComponent("text.autoconfig.simplesplashscreen.tooltip." + id);
+    private static ITextComponent tooltipTranslationKey(String id) {
+        return new TranslationTextComponent("text.autoconfig.simplesplashscreen.tooltip." + id);
     }
 
     public static class ConfigData {
@@ -62,7 +63,7 @@ public class SimpleSplashScreenConfigGui {
         private final ConfigEntryBuilder builder;
         private final ConfigCategory configCategory;
 
-        private final BooleanListEntry showProgressText, backgroundImage, customProgressBarBackground;
+        private final BooleanListEntry showProgressText, backgroundImage, customProgressBarBackground, logoProgressReversed;
         private final EnumListEntry progressBarType, logoStyle, customProgressBarMode, bossBarType;
         private final ColorEntry backgroundColor, progressBarColor, progressFrameColor;
         private final StringListEntry BackgroundTexture, MojangLogo, Aspect1to1Logo, BossBarTexture, CustomBarTexture, CustomBarBackgroundTexture;
@@ -80,6 +81,7 @@ public class SimpleSplashScreenConfigGui {
             progressFrameColor = createColorEntry("progressFrameColor", SimpleSplashScreen.CS_CONFIG.progressFrameColor, 16777215);
             customProgressBarMode = createEnumEntry("customProgressBarMode", SimpleSplashScreenConfig.ProgressBarMode.class, SimpleSplashScreen.CS_CONFIG.progressBarType, SimpleSplashScreenConfig.ProgressBarMode.Linear);
             customProgressBarBackground = createBooleanEntry("customProgressBarBackground", SimpleSplashScreen.CS_CONFIG.backgroundImage, false);
+            logoProgressReversed = createBooleanEntry("logoProgressReversed", SimpleSplashScreen.CS_CONFIG.logoProgressReversed, false);
             bossBarType = createEnumEntry("bossBarType", SimpleSplashScreenConfig.BossBarType.class, SimpleSplashScreen.CS_CONFIG.bossBarType, SimpleSplashScreenConfig.BossBarType.NOTCHED_6);
 
             SubCategoryBuilder subCategoryBuilder = builder.startSubCategory(translationKey("textures"));
@@ -143,6 +145,7 @@ public class SimpleSplashScreenConfigGui {
                     progressFrameColor.getValue(),
                     (SimpleSplashScreenConfig.ProgressBarMode)customProgressBarMode.getValue(),
                     customProgressBarBackground.getValue(),
+                    logoProgressReversed.getValue(),
                     (SimpleSplashScreenConfig.BossBarType)bossBarType.getValue(),
                     textures);
         }

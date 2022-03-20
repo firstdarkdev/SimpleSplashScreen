@@ -1,12 +1,12 @@
 package me.hypherionmc.simplesplashscreen.client.preview;
 
-import net.minecraft.server.packs.resources.ReloadInstance;
-import net.minecraft.util.Mth;
+import net.minecraft.resources.IAsyncReloader;
 import net.minecraft.util.Unit;
+import net.minecraft.util.math.MathHelper;
 
 import java.util.concurrent.CompletableFuture;
 
-public class PreviewResourceReloader implements ReloadInstance {
+public class PreviewResourceReloader implements IAsyncReloader {
 
     protected final long start;
     protected final long duration;
@@ -28,9 +28,14 @@ public class PreviewResourceReloader implements ReloadInstance {
 
     @Override
     public float getActualProgress() {
-        return Mth.clamp(
+        return MathHelper.clamp(
         (float) (System.currentTimeMillis() - start) / duration, 0, 1
         );
+    }
+
+    @Override
+    public boolean isApplying() {
+        return false;
     }
 
     @Override
