@@ -46,6 +46,7 @@ public class ResourceLoadProgressGuiMixin {
     @Shadow @Final private ReloadInstance reload;
 
     private int lastHeight = 0;
+    private int lastWidth = 0;
 
     private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation("empty.png");
     private static ResourceLocation MOJANG_TEXTURE;
@@ -177,7 +178,7 @@ public class ResourceLoadProgressGuiMixin {
         if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Aspect1to1) {
             fixForgeOverlay();
             if (CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Logo) {
-                renderLogo(matrixStack, o, 100);
+                renderLogo(matrixStack, o, 1);
             }
         }
     }
@@ -209,7 +210,7 @@ public class ResourceLoadProgressGuiMixin {
     private void renderProgressBar(LoadingOverlay resourceLoadProgressGui, PoseStack matrixStack, int x1, int y1, int x2, int y2, float opacity) {
         int i = Mth.ceil((float)(x2 - x1 - 2) * this.currentProgress);
 
-        if (CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Logo) {
+        if (CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Logo && CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Background) {
             // Bossbar Progress Bar
             if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.BossBar) {
                 RenderSystem.setShaderTexture(0, BOSS_BAR_TEXTURE);
@@ -265,8 +266,10 @@ public class ResourceLoadProgressGuiMixin {
                 fill(matrixStack, x1, y1, x1 + 1, y2, kk);
                 fill(matrixStack, x2, y1, x2 - 1, y2, kk);
             }
-        } else {
+        } else if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.Logo) {
             renderLogo(matrixStack, 1.0F, currentProgress);
+        } else {
+            renderBackgroundBar(matrixStack, 1.0F, currentProgress);
         }
     }
 
@@ -321,6 +324,28 @@ public class ResourceLoadProgressGuiMixin {
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();
         }
+    }
+
+    private void renderBackgroundBar(PoseStack matrixStack, float o, float currentProgress) {
+        int maxX = this.minecraft.getWindow().getGuiScaledWidth();
+        int maxY = this.minecraft.getWindow().getGuiScaledHeight();
+        double d = Math.min((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.75D, this.minecraft.getWindow().getGuiScaledHeight()) * 0.25D;
+        int m = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5D);
+        int r = (int)(d * 0.5D);
+        double e = d * 4.0D;
+        int s = (int)(e * 0.5D);
+        lastWidth = Math.max(Math.round(currentProgress * maxX), lastWidth);
+        int prog = (int) (((float) lastWidth / maxX) * s);
+
+        RenderSystem.setShaderTexture(0, CUSTOM_PROGRESS_BAR_TEXTURE);
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.setShader(GameRenderer::getPositionTexShader);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
+        blit(matrixStack, 0, 0, 0, 0, 0, lastWidth, maxY, maxX, maxY);
+        //blit(matrixStack, m - (s / 2), (r + s) - prog, s, s, 0, 512 - lastHeight, 512, 512, 512, 512);
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.disableBlend();
     }
 
     private void fixForgeOverlay() {
