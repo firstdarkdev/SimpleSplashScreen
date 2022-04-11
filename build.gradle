@@ -21,13 +21,15 @@ apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
 apply plugin: 'signing'
 
+var baseVersion = project.modversion
+
 group = 'me.hypherionmc'
-version = project.modversion
+version = baseVersion + (project.modversion_patch != "0" ? ".${project.modversion_patch}" : "")
 archivesBaseName = 'SimpleSplashScreen-1.18.1'
 
 // Jenkins
 if (System.getenv('BUILD_NUMBER') != null) {
-    version = version + "." + System.getenv('BUILD_NUMBER') + "d"
+    version = baseVersion + "." + System.getenv('BUILD_NUMBER') + "d"
 }
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'

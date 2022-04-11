@@ -37,6 +37,10 @@ public class SimpleSplashScreen {
     };
 
     public SimpleSplashScreen() {
+        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
+    }
+
+    public static void init() {
         LOGGER.info("Registering Config...");
         AutoConfig.register(SimpleSplashScreenConfig.class, JanksonConfigSerializer::new);
         CS_CONFIG = AutoConfig.getConfigHolder(SimpleSplashScreenConfig.class).getConfig();
@@ -64,15 +68,13 @@ public class SimpleSplashScreen {
         CS_CONFIG.textures.CustomBarTexture = renameFiles(CS_CONFIG.textures.CustomBarTexture);
         CS_CONFIG.textures.CustomBarBackgroundTexture = renameFiles(CS_CONFIG.textures.CustomBarBackgroundTexture);
         CS_CONFIG.textures.MojangLogo = renameFiles(CS_CONFIG.textures.MojangLogo);
-
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(this::clientSetup);
     }
 
     public void clientSetup(FMLClientSetupEvent event) {
         ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> SimpleSplashScreenConfigGui.getConfigScreen(parent)));
     }
 
-    private String renameFiles(String file) {
+    private static String renameFiles(String file) {
         File tmpfile = new File(CONFIG_PATH + "/" + file);
         if (tmpfile.exists()) {
             return tmpfile.renameTo(new File(CONFIG_PATH + "/" + file.toLowerCase())) ? file.toLowerCase() : file;

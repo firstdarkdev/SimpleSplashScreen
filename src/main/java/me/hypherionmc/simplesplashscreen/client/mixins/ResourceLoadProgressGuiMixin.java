@@ -60,6 +60,7 @@ public class ResourceLoadProgressGuiMixin {
 
     @Inject(at = @At("TAIL"), method = "registerTextures", cancellable = true)
     private static void init(Minecraft client, CallbackInfo ci) {
+        SimpleSplashScreen.init();
 
         MOJANG_TEXTURE = new ResourceLocation(CS_CONFIG.textures.MojangLogo);
         ASPECT_1to1_TEXTURE = new ResourceLocation(CS_CONFIG.textures.Aspect1to1Logo);
