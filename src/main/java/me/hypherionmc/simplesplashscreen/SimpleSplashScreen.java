@@ -28,6 +28,8 @@ public class SimpleSplashScreen {
     public static SimpleSplashScreenConfig CS_CONFIG;
     public static File CONFIG_PATH = new File(FMLPaths.CONFIGDIR.get() + "/simplesplashscreen");
 
+    public static boolean initDone = false;
+
     private static final Path[] textures = new Path[] {
         Paths.get(CONFIG_PATH + "/background.png"),
         Paths.get(CONFIG_PATH + "/mojangstudios.png"),
