@@ -14,6 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -50,9 +52,8 @@ public class SimpleSplashScreen {
                 try {
                     Files.copy(is, path, StandardCopyOption.REPLACE_EXISTING);
                     is.close();
-                } catch (Exception e) {
+                } catch (IOException ee) {
                     LOGGER.error("Failed to load resource " + path.getFileName().toString());
-                    e.printStackTrace();
                 }
             }
         }

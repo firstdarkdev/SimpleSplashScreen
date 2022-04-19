@@ -343,6 +343,7 @@ public class ResourceLoadProgressGuiMixin {
 
         minecraft.getTextureManager().bind(CUSTOM_PROGRESS_BAR_TEXTURE);
         RenderSystem.enableBlend();
+        RenderSystem.enableTexture();
         RenderSystem.alphaFunc(516, 0.0F);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, o);
         blit(matrixStack, 0, 0, 0, 0, 0, lastWidth, maxY, maxY, maxX);
@@ -351,6 +352,7 @@ public class ResourceLoadProgressGuiMixin {
         RenderSystem.defaultAlphaFunc();
         RenderSystem.disableBlend();
         renderProgressTextForge();
+        fixForgeOverlay();
     }
 
     private void fixForgeOverlay() {
@@ -358,7 +360,8 @@ public class ResourceLoadProgressGuiMixin {
         if (CS_CONFIG.showProgressText) {
             RenderSystem.enableTexture();
             RenderSystem.defaultBlendFunc();
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0f);
+            RenderSystem.defaultAlphaFunc();
+            RenderSystem.color3f(1.0f , 1.0f,1.0f);
         }
     }
 }
