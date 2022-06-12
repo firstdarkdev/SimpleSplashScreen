@@ -130,7 +130,7 @@ modrinth {
     versionType = "release"
     changelog = rootProject.file("changelog.md").text.trim()
     uploadFile = jar
-    versionName = "Simple Splash Screen ${project.version}"
+    versionName = "[${minecraft_version}] Simple Splash Screen ${project.version}"
     gameVersions = ["1.19"]
     loaders = [ "forge" ]
     dependencies {
@@ -153,7 +153,7 @@ curseforge {
         changelogType = "markdown"
         changelog = rootProject.file("changelog.md")
         mainArtifact(jar) {
-            displayName = "Simple Splash Screen ${project.version}"
+            displayName = "[${minecraft_version}] Simple Splash Screen ${project.version}"
         }
         relations {
             requiredDependency 'cloth-config'
