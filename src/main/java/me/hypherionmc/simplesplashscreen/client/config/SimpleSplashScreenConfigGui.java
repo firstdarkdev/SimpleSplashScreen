@@ -16,20 +16,21 @@ import me.shedaniel.clothconfig2.impl.builders.SubCategoryBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 
 public class SimpleSplashScreenConfigGui {
 
     public static Screen getConfigScreen(Screen parent) {
         final ConfigBuilder builder = ConfigBuilder.create()
                 .setParentScreen(parent)
-                .setTitle(new TranslatableComponent("text.autoconfig.simplesplashscreen.title"));
+                .setTitle(Component.translatable("text.autoconfig.simplesplashscreen.title"));
 
         final SimpleSplashScreenConfig oldConfig = SimpleSplashScreen.CS_CONFIG;
 
-        ConfigCategory configCategory = builder.getOrCreateCategory(new TranslatableComponent(""));
+        ConfigCategory configCategory = builder.getOrCreateCategory(Component.translatable(""));
         ConfigData configData = new ConfigData(builder.entryBuilder(), configCategory);
-        configCategory.addEntry(new ButtonConfigEntry(new TranslatableComponent("text.autoconfig.simplesplashscreen.button.preview"), button -> {
+        configCategory.addEntry(new ButtonConfigEntry(Component.translatable("text.autoconfig.simplesplashscreen.button.preview"), button -> {
             SimpleSplashScreen.CS_CONFIG = configData.getConfig();
             LoadingOverlay.registerTextures(Minecraft.getInstance());
             Minecraft.getInstance().setOverlay(new ReloadPreviewScreen(500, () -> SimpleSplashScreen.CS_CONFIG = oldConfig));
@@ -49,12 +50,12 @@ public class SimpleSplashScreenConfigGui {
         return builder.build();
     }
 
-    private static TranslatableComponent translationKey(String id) {
-        return new TranslatableComponent("text.autoconfig.simplesplashscreen.option." + id);
+    private static MutableComponent translationKey(String id) {
+        return Component.translatable("text.autoconfig.simplesplashscreen.option." + id);
     }
 
-    private static TranslatableComponent tooltipTranslationKey(String id) {
-        return new TranslatableComponent("text.autoconfig.simplesplashscreen.tooltip." + id);
+    private static MutableComponent tooltipTranslationKey(String id) {
+        return Component.translatable("text.autoconfig.simplesplashscreen.tooltip." + id);
     }
 
     public static class ConfigData {

@@ -76,13 +76,9 @@ public class GifTextureRenderer {
             }
 
             RenderSystem.setShaderTexture(0, new ResourceLocation(textureID + "_frame_" + currentFrame));
-            RenderSystem.enableBlend();
-            RenderSystem.blendEquation(32774);
-            RenderSystem.blendFunc(770, 1);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
             blit(stack, 0, 0, 0, 0, 0, maxX, maxY, maxX, maxY);
             RenderSystem.defaultBlendFunc();
-            RenderSystem.disableBlend();
         }
     }
 

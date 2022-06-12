@@ -5,51 +5,48 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import me.hypherionmc.simplesplashscreen.SimpleSplashScreen;
 import me.hypherionmc.simplesplashscreen.client.config.SimpleSplashScreenConfig;
-import me.hypherionmc.simplesplashscreen.client.textures.BlurredConfigTexture;
 import me.hypherionmc.simplesplashscreen.client.textures.ConfigTexture;
-import me.hypherionmc.simplesplashscreen.client.textures.EmptyTexture;
 import me.hypherionmc.simplesplashscreen.client.textures.GifTextureRenderer;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.LoadingOverlay;
-import net.minecraft.client.gui.screens.Overlay;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadInstance;
 import net.minecraft.util.FastColor;
 import net.minecraft.util.Mth;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.loading.ClientModLoader;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import static me.hypherionmc.simplesplashscreen.SimpleSplashScreen.CS_CONFIG;
 import static net.minecraft.client.gui.GuiComponent.blit;
 import static net.minecraft.client.gui.GuiComponent.fill;
 
-@OnlyIn(Dist.CLIENT)
 @Mixin(LoadingOverlay.class)
-public class ResourceLoadProgressGuiMixin {
+public class LoadingOverlayMixin {
 
     @Shadow @Final static ResourceLocation MOJANG_STUDIOS_LOGO_LOCATION;
     @Shadow @Final private Minecraft minecraft;
     @Shadow @Final private boolean fadeIn;
+
     @Shadow private float currentProgress;
-    @Shadow private final long fadeOutStart = -1L;
+    @Shadow private long fadeOutStart = -1L;
     @Shadow private long fadeInStart = -1L;
     @Shadow @Final private ReloadInstance reload;
+
+    @Shadow @Final private Consumer<Optional<Throwable>> onFinish;
 
     private int lastHeight = 0;
     private int lastWidth = 0;
 
     private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation("empty.png");
-    private static ResourceLocation MOJANG_TEXTURE;
     private static ResourceLocation ASPECT_1to1_TEXTURE;
     private static ResourceLocation BOSS_BAR_TEXTURE;
     private static ResourceLocation CUSTOM_PROGRESS_BAR_TEXTURE;
@@ -65,7 +62,6 @@ public class ResourceLoadProgressGuiMixin {
             SimpleSplashScreen.initDone = true;
         }
 
-        MOJANG_TEXTURE = new ResourceLocation(CS_CONFIG.textures.MojangLogo);
         ASPECT_1to1_TEXTURE = new ResourceLocation(CS_CONFIG.textures.Aspect1to1Logo);
         BOSS_BAR_TEXTURE = new ResourceLocation(CS_CONFIG.textures.BossBarTexture);
         CUSTOM_PROGRESS_BAR_TEXTURE = new ResourceLocation(CS_CONFIG.textures.CustomBarTexture);
@@ -74,12 +70,6 @@ public class ResourceLoadProgressGuiMixin {
 
         gifLogo = null;
         gifBackground = null;
-
-        if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Mojang) {
-            client.getTextureManager().register(MOJANG_STUDIOS_LOGO_LOCATION, new BlurredConfigTexture(MOJANG_TEXTURE));
-        } else {
-            client.getTextureManager().register(MOJANG_STUDIOS_LOGO_LOCATION, new EmptyTexture(EMPTY_TEXTURE));
-        }
 
         if (ASPECT_1to1_TEXTURE.getPath().endsWith("gif")) {
             gifLogo = new GifTextureRenderer(CS_CONFIG.textures.Aspect1to1Logo, client);
@@ -101,117 +91,130 @@ public class ResourceLoadProgressGuiMixin {
         ci.cancel();
     }
 
-    // Render Custom Background
-    @Inject(method = "render", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/systems/RenderSystem;setShaderTexture(ILnet/minecraft/resources/ResourceLocation;)V"))
-    public void renderBackground(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
-        int maxX = this.minecraft.getWindow().getGuiScaledWidth();
-        int maxY = this.minecraft.getWindow().getGuiScaledHeight();
+    @Inject(at = @At("HEAD"), method = "render", cancellable = true)
+    private void injectRender(PoseStack poseStack, int p_96179_, int p_96180_, float partialTicks, CallbackInfo ci) {
+        ci.cancel();
 
-        long l = Util.getMillis();
-        if (this.fadeIn && (this.reload.isDone() || this.minecraft.screen != null) && this.fadeInStart == -1L) {
-            this.fadeInStart = l;
+        int width = this.minecraft.getWindow().getGuiScaledWidth();
+        int height = this.minecraft.getWindow().getGuiScaledHeight();
+
+        long millis = Util.getMillis();
+        if (this.fadeIn && this.fadeInStart == -1L) {
+            this.fadeInStart = millis;
         }
 
-        float f = this.fadeOutStart > -1L ? (float)(l - this.fadeOutStart) / 1000.0F : -1.0F;
-        float g = this.fadeInStart > -1L ? (float)(l - this.fadeInStart) / 500.0F : -1.0F;
-        float o;
-        int m;
+        float fadeOutTime = this.fadeOutStart > -1L ? (float)(millis - this.fadeOutStart) / 1000.0F : -1.0F;
+        float fadeInTime = this.fadeInStart > -1L ? (float)(millis - this.fadeInStart) / 500.0F : -1.0F;
+        float timedAlpha;
 
-        if (f >= 1.0F) {
+        if (fadeOutTime >= 1.0F) {
             if (this.minecraft.screen != null) {
-                this.minecraft.screen.render(matrixStack, 0, 0, partialTicks);
+                this.minecraft.screen.render(poseStack, 0, 0, partialTicks);
             }
 
-            m = Mth.ceil((1.0F - Mth.clamp(f - 1.0F, 0.0F, 1.0F)) * 255.0F);
-            fill(matrixStack, 0, 0, maxX, maxY, withAlpha(m));
-            o = 1.0F - Mth.clamp(f - 1.0F, 0.0F, 1.0F);
+            int alpha = Mth.ceil((1.0F - Mth.clamp(fadeOutTime - 1.0F, 0.0F, 1.0F)) * 255.0F);
+            fill(poseStack, 0, 0, width, height, replaceAlpha(getBGColor(), alpha));
+            timedAlpha = 1.0F - Mth.clamp(fadeOutTime - 1.0F, 0.0F, 1.0F);
         } else if (this.fadeIn) {
-            if (this.minecraft.screen != null && g < 1.0F) {
-                this.minecraft.screen.render(matrixStack, mouseX, mouseY, partialTicks);
+            if (this.minecraft.screen != null && fadeInTime < 1.0F) {
+                this.minecraft.screen.render(poseStack, p_96179_, p_96180_, partialTicks);
             }
 
-            m = Mth.ceil(Mth.clamp((double)g, 0.15D, 1.0D) * 255.0D);
-            fill(matrixStack, 0, 0, maxX, maxY, withAlpha(m));
-            o = Mth.clamp(g, 0.0F, 1.0F);
+            int alpha = Mth.ceil(Mth.clamp(fadeInTime, 0.15D, 1.0D) * 255.0D);
+            fill(poseStack, 0, 0, width, height, replaceAlpha(getBGColor(), alpha));
+            timedAlpha = Mth.clamp(fadeInTime, 0.0F, 1.0F);
         } else {
-            m = getBackgroundColor();
-            float p = (float)(m >> 16 & 255) / 255.0F;
-            float q = (float)(m >> 8 & 255) / 255.0F;
-            float r = (float)(m & 255) / 255.0F;
-            GlStateManager._clearColor(p, q, r, 1.0F);
+            int color = getBGColor();
+            float r = (float)(color >> 16 & 255) / 255.0F;
+            float g = (float)(color >> 8 & 255) / 255.0F;
+            float b = (float)(color & 255) / 255.0F;
+            GlStateManager._clearColor(r, g, b, 1.0F);
             GlStateManager._clear(16384, Minecraft.ON_OSX);
-            o = 1.0F;
+            timedAlpha = 1.0F;
         }
 
+        /* Custom Background */
         if (CS_CONFIG.backgroundImage) {
             if (gifBackground != null) {
-                gifBackground.renderNextFrame(matrixStack, maxX, maxY, o);
+                gifBackground.renderNextFrame(poseStack, width, height, timedAlpha);
             } else {
                 RenderSystem.setShaderTexture(0, BACKGROUND_TEXTURE);
                 RenderSystem.enableBlend();
                 RenderSystem.blendEquation(32774);
                 RenderSystem.blendFunc(770, 1);
                 RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
-                blit(matrixStack, 0, 0, 0, 0, 0, maxX, maxY, maxX, maxY);
+                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, timedAlpha);
+                blit(poseStack, 0, 0, 0, 0, 0, width, height, width, height);
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.disableBlend();
             }
         }
-    }
 
-    // Render Custom Logo
-    @Inject(at = @At("TAIL"), method = "render")
-    public void renderLogo(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
-        long l = Util.getMillis();
-        if (this.fadeIn && (this.reload.isDone() || this.minecraft.screen != null) && this.fadeInStart == -1L) {
-            this.fadeInStart = l;
-        }
-        float f = this.fadeOutStart > -1L ? (float)(l - this.fadeOutStart) / 1000.0F : -1.0F;
-        float g = this.fadeInStart > -1L ? (float)(l - this.fadeInStart) / 500.0F : -1.0F;
-        float o;
+        int scaledWidth = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5D);
+        int scaledHeight = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.5D);
+        double scale = Math.min((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.75D, this.minecraft.getWindow().getGuiScaledHeight()) * 0.25D;
+        int i1 = (int)(scale * 0.5D);
+        double d0 = scale * 4.0D;
+        int j1 = (int)(d0 * 0.5D);
 
-        if (f >= 1.0F) {
-            o = 1.0F - Mth.clamp(f - 1.0F, 0.0F, 1.0F);
-        } else if (this.fadeIn) {
-            o = Mth.clamp(g, 0.0F, 1.0F);
-        } else {
-            o = 1.0F;
-        }
+        /* Progress Bar */
+        int k1 = (int)((double)this.minecraft.getWindow().getGuiScaledHeight() * 0.8325D);
+        float f6 = this.reload.getActualProgress();
+        this.currentProgress = Mth.clamp(this.currentProgress * 0.95F + f6 * 0.050000012F, 0.0F, 1.0F);
 
-        if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Aspect1to1) {
+        if (CS_CONFIG.showProgressText) {
+            net.minecraftforge.client.loading.ClientModLoader.renderProgressText();
             fixForgeOverlay();
-            if (CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Logo) {
-                renderLogo(matrixStack, o, 1);
+        }
+
+        if (fadeOutTime < 1.0F) {
+            this.drawProgressBar(poseStack, width / 2 - j1, k1 - 5, width / 2 + j1, k1 + 5, 1.0F - Mth.clamp(fadeOutTime, 0.0F, 1.0F));
+        }
+
+        /* LOGO */
+        if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Mojang) {
+            RenderSystem.setShaderTexture(0, MOJANG_STUDIOS_LOGO_LOCATION);
+            RenderSystem.enableBlend();
+            RenderSystem.blendEquation(32774);
+            RenderSystem.blendFunc(770, 1);
+            RenderSystem.setShader(GameRenderer::getPositionTexShader);
+            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, timedAlpha);
+            blit(poseStack, scaledWidth - j1, scaledHeight - i1, j1, (int)scale, -0.0625F, 0.0F, 120, 60, 120, 120);
+            blit(poseStack, scaledWidth, scaledHeight - i1, j1, (int)scale, 0.0625F, 60.0F, 120, 60, 120, 120);
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.disableBlend();
+        } else {
+            renderLogo(poseStack, timedAlpha, 1);
+        }
+
+        if (fadeOutTime >= 2.0F) {
+            this.minecraft.setOverlay(null);
+        }
+
+        if (this.fadeOutStart == -1L && this.reload.isDone() && (!this.fadeIn || fadeInTime >= 2.0F)) {
+            this.fadeOutStart = Util.getMillis(); // Moved up to guard against inf loops caused by callback
+            try {
+                this.reload.checkExceptions();
+                this.onFinish.accept(Optional.empty());
+            } catch (Throwable throwable) {
+                this.onFinish.accept(Optional.of(throwable));
+            }
+
+            if (this.minecraft.screen != null) {
+                this.minecraft.screen.init(this.minecraft, this.minecraft.getWindow().getGuiScaledWidth(), this.minecraft.getWindow().getGuiScaledHeight());
             }
         }
     }
 
-    // Modify Background Color
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/LoadingOverlay;fill(Lcom/mojang/blaze3d/vertex/PoseStack;IIIII)V"))
-    private void modifyBackgroundColor(PoseStack matrixStack, int minX, int minY, int maxX, int maxY, int color) {
-        long l = Util.getMillis();
-        if (this.fadeIn && (this.reload.isDone() || this.minecraft.screen != null) && this.fadeInStart == -1L) {
-            this.fadeInStart = l;
-        }
-        float f = this.fadeOutStart > -1L ? (float)(l - this.fadeOutStart) / 1000.0F : -1.0F;
-        int m;
-        m = Mth.ceil((1.0F - Mth.clamp(f - 1.0F, 0.0F, 1.0F)) * 255.0F);
-
-        int clr = color;
-
-        if (CS_CONFIG.backgroundImage) {
-            clr = FastColor.ARGB32.color(0, 0, 0, 0);
-        }
-        else {
-            clr = CS_CONFIG.backgroundColor | m << 24;
-        }
-
-        fill(matrixStack, minX, minY, maxX, maxY, clr);
+    private static int replaceAlpha(int clr, int alpha) {
+        return getBGColor() & 16777215 | alpha << 24;
     }
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/gui/screens/LoadingOverlay;drawProgressBar(Lcom/mojang/blaze3d/vertex/PoseStack;IIIIF)V"))
-    private void renderProgressBar(LoadingOverlay resourceLoadProgressGui, PoseStack matrixStack, int x1, int y1, int x2, int y2, float opacity) {
+    private static int getBGColor() {
+        return CS_CONFIG.backgroundImage ? FastColor.ARGB32.color(0, 0, 0, 0) : CS_CONFIG.backgroundColor;
+    }
+
+    private void drawProgressBar(PoseStack matrixStack, int x1, int y1, int x2, int y2, float opacity) {
         int i = Mth.ceil((float)(x2 - x1 - 2) * this.currentProgress);
 
         if (CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Logo && CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Background) {
@@ -277,36 +280,6 @@ public class ResourceLoadProgressGuiMixin {
         }
     }
 
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;setOverlay(Lnet/minecraft/client/gui/screens/Overlay;)V"))
-    public void setLoadingGui(Minecraft minecraft, Overlay loadingGuiIn) {
-        this.minecraft.setOverlay(null);
-        if (gifBackground != null) {
-            gifBackground.unloadAll();
-        }
-        if (gifLogo != null) {
-            gifLogo.unloadAll();
-        }
-    }
-
-    @Redirect(method = "render", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/client/loading/ClientModLoader;renderProgressText()V"))
-    private void renderProgressTextForge() {
-        if (CS_CONFIG.showProgressText) {
-            ClientModLoader.renderProgressText();
-        }
-    }
-
-    private static int getBackgroundColor() {
-        if (CS_CONFIG.backgroundImage) {
-            return FastColor.ARGB32.color(0, 0, 0, 0);
-        } else {
-            return SimpleSplashScreen.CS_CONFIG.backgroundColor;
-        }
-    }
-
-    private static int withAlpha(int alpha) {
-        return getBackgroundColor() | alpha << 24;
-    }
-
     private void renderLogo(PoseStack matrixStack, float o, float currentProgress) {
         double d = Math.min((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.75D, this.minecraft.getWindow().getGuiScaledHeight()) * 0.25D;
         int m = (int)((double)this.minecraft.getWindow().getGuiScaledWidth() * 0.5D);
@@ -347,7 +320,6 @@ public class ResourceLoadProgressGuiMixin {
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
         blit(matrixStack, 0, 0, 0, 0, 0, lastWidth, maxY, maxX, maxY);
-        //blit(matrixStack, m - (s / 2), (r + s) - prog, s, s, 0, 512 - lastHeight, 512, 512, 512, 512);
         RenderSystem.defaultBlendFunc();
         RenderSystem.disableBlend();
     }
@@ -361,4 +333,5 @@ public class ResourceLoadProgressGuiMixin {
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0f);
         }
     }
+
 }

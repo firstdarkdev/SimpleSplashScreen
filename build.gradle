@@ -1,23 +1,21 @@
 buildscript {
     repositories {
-        maven {
-            name = 'sponge'
-            url = 'https://repo.spongepowered.org/maven'
-        }
         maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
         mavenCentral()
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-        classpath 'org.parchmentmc:librarian:1.+'
+        classpath 'org.spongepowered:mixingradle:0.7.+'
     }
+}
+
+plugins {
+    id "me.hypherionmc.cursegradle" version "2.0.1"
+    id "com.modrinth.minotaur" version "2.+"
 }
 
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
 apply plugin: 'signing'
 
@@ -25,7 +23,7 @@ var baseVersion = project.modversion
 
 group = 'me.hypherionmc'
 version = baseVersion + (project.modversion_patch != "0" ? ".${project.modversion_patch}" : "")
-archivesBaseName = 'SimpleSplashScreen-1.18.1'
+archivesBaseName = "SimpleSplashScreen-${project.minecraft_version}"
 
 // Jenkins
 if (System.getenv('BUILD_NUMBER') != null) {
@@ -35,7 +33,7 @@ if (System.getenv('BUILD_NUMBER') != null) {
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
 
 minecraft {
-    mappings channel: 'parchment', version: '2022.03.06-1.18.1'
+    mappings channel: 'official', version: minecraft_version
     // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
@@ -83,12 +81,16 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     maven { url "https://maven.shedaniel.me/" }
+    maven {
+        name = 'Sponge / Mixin'
+        url = 'https://repo.spongepowered.org/repository/maven-public/'
+    }
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18-38.0.14'
-    implementation(fg.deobf("me.shedaniel.cloth:cloth-config-forge:6.0.43"))
-    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
+    minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
+    implementation(fg.deobf("me.shedaniel.cloth:cloth-config-forge:${cloth_version}"))
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
 jar {
@@ -118,4 +120,51 @@ if (System.getProperty("idea.sync.active") == "true") {
             it.options.annotationProcessorPath = files()
         }
     }
+}
+
+modrinth {
+    debugMode = false
+    token = System.getenv("MODRINTH_TOKEN")
+    projectId = "4uhcFYch"
+    versionNumber = "${minecraft_version}-${project.version}"
+    versionType = "release"
+    changelog = rootProject.file("changelog.md").text.trim()
+    uploadFile = jar
+    versionName = "Simple Splash Screen ${project.version}"
+    gameVersions = ["1.19"]
+    loaders = [ "forge" ]
+    dependencies {
+        required.project "9s6osm5g"
+    }
+}
+
+curseforge {
+    if (System.getenv("CURSE_TOKEN") != null) {
+        apiKey = System.getenv("CURSE_TOKEN")
+    } else {
+        apiKey = ""
+    }
+    project {
+        id = "503390"
+        releaseType = "release"
+        addGameVersion "1.19"
+        addGameVersion "Forge"
+        addGameVersion "Java 17"
+        changelogType = "markdown"
+        changelog = rootProject.file("changelog.md")
+        mainArtifact(jar) {
+            displayName = "Simple Splash Screen ${project.version}"
+        }
+        relations {
+            requiredDependency 'cloth-config'
+        }
+    }
+    options {
+        forgeGradleIntegration = false
+        debug = false
+    }
+}
+
+afterEvaluate {
+    tasks.curseforge503390.dependsOn reobfShadowJar
 }
