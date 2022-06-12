@@ -126,7 +126,7 @@ modrinth {
     debugMode = false
     token = System.getenv("MODRINTH_TOKEN")
     projectId = "4uhcFYch"
-    versionNumber = "${minecraft_version}-${project.version}"
+    versionNumber = "${project.version}"
     versionType = "release"
     changelog = rootProject.file("changelog.md").text.trim()
     uploadFile = jar
