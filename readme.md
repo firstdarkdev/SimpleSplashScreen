@@ -12,7 +12,7 @@ Please note, on forge this mod will only take effect once the forge pre-loading 
 
 [![image-1626178779386.png](https://docs.hypherionmc.me/uploads/images/gallery/2021-07/scaled-1680-/image-1626178779386.png)](https://docs.hypherionmc.me/uploads/images/gallery/2021-07/image-1626178779386.png)
 
-If you need help to configure this mod, please check out the [WIKI](https://docs.hypherionmc.me/books/simple-splash-screen-manual/), or alternative, you can join my discord server and ask for help in the "simple-splash-screen" channel.
+If you need help to configure this mod, please check out the [WIKI]([https://docs.hypherionmc.me/books/simple-splash-screen-manual/](https://readme.firstdarkdev.xyz/simple-splash-screen/introduction/)), or alternative, you can join my discord server and ask for help in the "simple-splash-screen" channel.
 
 If you find a bug, or have any suggestions, then you can also [Log a ticket](https://github.com/Exploding-Creeper/SimpleSplashScreen/issues). If you'd like to contribute to the mod, you can find the [Source Code](https://github.com/Exploding-Creeper/SimpleSplashScreen/) on github.
 
