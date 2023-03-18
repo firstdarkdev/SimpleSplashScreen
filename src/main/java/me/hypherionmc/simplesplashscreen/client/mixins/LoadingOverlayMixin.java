@@ -183,7 +183,7 @@ public class LoadingOverlayMixin {
             blit(poseStack, scaledWidth, scaledHeight - i1, j1, (int)scale, 0.0625F, 60.0F, 120, 60, 120, 120);
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();
-        } else {
+        } else if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Aspect1to1 && CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Logo) {
             renderLogo(poseStack, timedAlpha, 1);
         }
 

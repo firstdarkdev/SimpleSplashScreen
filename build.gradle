@@ -10,8 +10,7 @@ buildscript {
 }
 
 plugins {
-    id "me.hypherionmc.cursegradle" version "2.0.1"
-    id "com.modrinth.minotaur" version "2.+"
+    id "me.hypherionmc.modutils.modpublisher" version "1.0.7"
 }
 
 apply plugin: 'net.minecraftforge.gradle'
@@ -19,15 +18,18 @@ apply plugin: 'org.spongepowered.mixin'
 apply plugin: 'eclipse'
 apply plugin: 'signing'
 
-var baseVersion = project.modversion
-
 group = 'me.hypherionmc'
-version = baseVersion + (project.modversion_patch != "0" ? ".${project.modversion_patch}" : "")
 archivesBaseName = "SimpleSplashScreen-${project.minecraft_version}"
 
+ext {
+    release=project.properties['release'] ?: false
+}
+
+version = modversion + (modversion_patch > 0 ? ".${modversion_patch}" : "")
+
 // Jenkins
-if (System.getenv('BUILD_NUMBER') != null) {
-    version = baseVersion + "." + System.getenv('BUILD_NUMBER') + "d"
+if (!release && System.getenv('BUILD_NUMBER') != null) {
+    version = modversion + "." + System.getenv('BUILD_NUMBER') + "d"
 }
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '17'
@@ -122,49 +124,29 @@ if (System.getProperty("idea.sync.active") == "true") {
     }
 }
 
-modrinth {
-    debugMode = false
-    token = System.getenv("MODRINTH_TOKEN")
-    projectId = "4uhcFYch"
-    versionNumber = "${minecraft_version}-${project.version}"
+publisher {
+    apiKeys {
+        curseforge = System.getenv("CURSE_TOKEN")
+        modrinth = System.getenv("MODRINTH_TOKEN")
+    }
+
+    curseID = "503390"
+    modrinthID = "4uhcFYch"
     versionType = "release"
-    changelog = rootProject.file("changelog.md").text.trim()
-    uploadFile = jar
-    versionName = "[${minecraft_version}] Simple Splash Screen ${project.version}"
-    gameVersions = ["1.19"]
-    loaders = [ "forge" ]
-    dependencies {
-        required.project "9s6osm5g"
+    changelog = rootProject.file("changelog.md")
+    version = "${minecraft_version}-${project.version}"
+    displayName = "[1.19.2] Simple Splash Screen ${project.version}"
+    gameVersions = ["1.19.2"]
+    loaders = ["forge"]
+    artifact = jar
+
+    modrinthDepends {
+        required = ["9s6osm5g"]
+    }
+
+    curseDepends {
+        optional = ["cloth-config"]
     }
 }
 
-curseforge {
-    if (System.getenv("CURSE_TOKEN") != null) {
-        apiKey = System.getenv("CURSE_TOKEN")
-    } else {
-        apiKey = ""
-    }
-    project {
-        id = "503390"
-        releaseType = "release"
-        addGameVersion "1.19"
-        addGameVersion "Forge"
-        addGameVersion "Java 17"
-        changelogType = "markdown"
-        changelog = rootProject.file("changelog.md")
-        mainArtifact(jar) {
-            displayName = "[${minecraft_version}] Simple Splash Screen ${project.version}"
-        }
-        relations {
-            requiredDependency 'cloth-config'
-        }
-    }
-    options {
-        forgeGradleIntegration = false
-        debug = false
-    }
-}
-
-afterEvaluate {
-    tasks.curseforge503390.dependsOn reobfJar
-}
+publishMod.dependsOn(build)

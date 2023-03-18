@@ -4,7 +4,7 @@ import me.hypherionmc.simplesplashscreen.client.config.SimpleSplashScreenConfig;
 import me.hypherionmc.simplesplashscreen.client.config.SimpleSplashScreenConfigGui;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
-import net.minecraftforge.client.ConfigGuiHandler;
+import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -73,7 +73,7 @@ public class SimpleSplashScreen {
     }
 
     public void clientSetup(FMLClientSetupEvent event) {
-        ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory((client, parent) -> SimpleSplashScreenConfigGui.getConfigScreen(parent)));
+        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory((client, parent) -> SimpleSplashScreenConfigGui.getConfigScreen(parent)));
     }
 
     private static String renameFiles(String file) {
