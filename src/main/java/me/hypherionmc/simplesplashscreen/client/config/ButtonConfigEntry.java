@@ -20,13 +20,13 @@ public class ButtonConfigEntry extends AbstractConfigListEntry<Void> {
     public ButtonConfigEntry(Component fieldName, Button.OnPress onPress) {
         super(fieldName, false);
         final int width = Minecraft.getInstance().font.width(fieldName) + 24;
-        button = new Button(0, 0, width, 20, fieldName, onPress);
+        button = Button.builder(fieldName, onPress).width(width).pos(0, 0).build();
     }
 
     @Override
     public void render(PoseStack matrices, int index, int y, int x, int entryWidth, int entryHeight, int mouseX, int mouseY, boolean isHovered, float delta) {
-        button.x = x + (entryWidth - button.getWidth()) / 2;
-        button.y = y + (entryHeight - 20) / 2;
+        button.setX(x + (entryWidth - button.getWidth()) / 2);
+        button.setY(y + (entryHeight - 20) / 2);
         button.render(matrices, mouseX, mouseY, delta);
     }
 
