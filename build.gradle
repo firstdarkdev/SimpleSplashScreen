@@ -145,7 +145,7 @@ publisher {
     }
 
     curseDepends {
-        optional = ["cloth-config"]
+        required = ["cloth-config"]
     }
 }
 
