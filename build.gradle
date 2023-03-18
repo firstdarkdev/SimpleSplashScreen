@@ -135,8 +135,8 @@ publisher {
     versionType = "release"
     changelog = rootProject.file("changelog.md")
     version = "${minecraft_version}-${project.version}"
-    displayName = "[1.19.3/4] Simple Splash Screen ${project.version}"
-    gameVersions = ["1.19.3", "1.19.4"]
+    displayName = "[1.19.4] Simple Splash Screen ${project.version}"
+    gameVersions = ["1.19.4"]
     loaders = ["forge"]
     artifact = jar
 
@@ -145,7 +145,7 @@ publisher {
     }
 
     curseDepends {
-        optional = ["cloth-config"]
+        required = ["cloth-config"]
     }
 }
 
