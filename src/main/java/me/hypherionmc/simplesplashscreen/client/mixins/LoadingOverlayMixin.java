@@ -327,7 +327,7 @@ public class LoadingOverlayMixin {
     private void fixForgeOverlay() {
         // The forge Progress Text breaks the custom Image Rendering, so this is a workaround to fix it
         if (CS_CONFIG.showProgressText) {
-            RenderSystem.enableTexture();
+            //RenderSystem.enableTexture();
             RenderSystem.defaultBlendFunc();
             RenderSystem.setShader(GameRenderer::getPositionTexShader);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0f);
