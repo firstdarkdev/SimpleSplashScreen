@@ -1,121 +1,101 @@
-buildscript {
+plugins {
+    id 'java'
+    id "xyz.wagyourtail.unimined" version "1.1.0-SNAPSHOT" apply false
+}
+
+// Edit in gradle.properties
+group = project_group
+version = "${version_major}.${version_minor}.${version_patch}"
+
+subprojects {
+    apply plugin: "xyz.wagyourtail.unimined"
+    apply plugin: "java"
+    apply plugin: 'maven-publish'
+
+    group = rootProject.group
+    version = rootProject.version
+
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+
+    // Add your maven repositories here
     repositories {
-        maven {
-            name = 'sponge'
-            url = 'https://repo.spongepowered.org/maven'
-        }
-        maven { url = 'https://maven.minecraftforge.net' }
-        maven { url = 'https://maven.parchmentmc.org' }
         mavenCentral()
+
+        maven {
+            url "https://mcentral.firstdark.dev/releases"
+        }
     }
+
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1+', changing: true
-        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
-        classpath 'org.parchmentmc:librarian:1.+'
+        compileOnly 'org.projectlombok:lombok:1.18.30'
+        annotationProcessor 'org.projectlombok:lombok:1.18.30'
     }
-}
 
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'org.spongepowered.mixin'
-apply plugin: 'org.parchmentmc.librarian.forgegradle'
-apply plugin: 'eclipse'
-apply plugin: 'signing'
-
-var baseVersion = project.modversion
-
-group = 'me.hypherionmc'
-version = baseVersion + (project.modversion_patch != "0" ? ".${project.modversion_patch}" : "")
-archivesBaseName = 'SimpleSplashScreen-1.16.5'
-
-// Jenkins
-if (System.getenv('BUILD_NUMBER') != null) {
-    version = baseVersion + "." + System.getenv('BUILD_NUMBER') + "d"
-}
-
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8'
-
-minecraft {
-    mappings channel: 'parchment', version: '2022.03.06-1.16.5'
-    // accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-
-    runs {
-        client {
-            workingDirectory project.file('run')
-            arg "-mixin.config=simplesplashscreen.mixins.json"
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                simplesplashscreen {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-
-            mods {
-                simplesplashscreen {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-            property 'forge.logging.markers', 'SCAN,REGISTRIES,REGISTRYDUMP'
-            property 'forge.logging.console.level', 'debug'
-            args '--mod', 'simplesplashscreen', '--all', '--output', file('src/generated/resources/'), '--existing', file('src/main/resources/')
-
-            mods {
-                simplesplashscreen {
-                    source sourceSets.main
-                }
-            }
+    jar {
+        manifest {
+            attributes([
+                    'Specification-Title'     : project.archivesBaseName,
+                    'Specification-Vendor'    : mod_author,
+                    'Specification-Version'   : project.version,
+                    'Implementation-Title'    : project.name,
+                    'Implementation-Version'  : project.version,
+                    'Implementation-Vendor'   : mod_author,
+                    'Implementation-Timestamp': new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
+                    'Timestamp'               : System.currentTimeMillis(),
+                    'Built-On-Java'           : "${System.getProperty('java.vm.version')} (${System.getProperty('java.vm.vendor')})",
+                    'Built-On-Minecraft'      : minecraft_version
+            ])
         }
     }
-}
 
-sourceSets.main.resources { srcDir 'src/generated/resources' }
+    /**
+     * ===============================================================================
+     * =       DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING        =
+     * ===============================================================================
+     */
 
-repositories {
-    maven { url "https://maven.shedaniel.me/" }
-}
+    unimined.minecraft(sourceSets.main, true) {
+        version minecraft_version
 
-dependencies {
-    minecraft 'net.minecraftforge:forge:1.16.5-36.1.10'
-    implementation(fg.deobf("me.shedaniel.cloth:cloth-config-forge:4.11.26"))
-    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
-}
-
-jar {
-    manifest {
-        attributes([
-                "Specification-Title"     : "simplesplashscreen",
-                "Specification-Vendor"    : "HypherionSA",
-                "Specification-Version"   : "1", // We are version 1 of ourselves
-                "Implementation-Title"    : project.name,
-                "Implementation-Version"  : project.version,
-                "Implementation-Vendor"   : "HypherionSA",
-                "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-                "MixinConfigs"            : "simplesplashscreen.mixins.json"
-        ])
-    }
-}
-
-jar.finalizedBy('reobfJar')
-
-mixin {
-    add sourceSets.main, "simplesplashscreen.refmap.json"
-}
-
-if (System.getProperty("idea.sync.active") == "true") {
-    afterEvaluate {
-        tasks.withType(JavaCompile).all {
-            it.options.annotationProcessorPath = files()
+        mappings {
+            mojmap()
+            devNamespace "mojmap"
         }
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = 'UTF-8'
+        it.options.release = 17
+    }
+
+    tasks.withType(GenerateModuleMetadata) {
+        enabled = false
+    }
+
+    clean {
+        delete "$rootDir/artifacts"
+    }
+
+    if (project.name !== 'Common') {
+        tasks.register('delDevJar') {
+            doLast {
+                def tree = fileTree('build/libs')
+                tree.include '**/*-dev-shadow.jar'
+                tree.include '**/*-dev.jar'
+                tree.include '**/*-all.jar'
+                tree.include '**/*-slim.jar'
+                tree.each { it.delete() }
+            }
+        }
+        build.finalizedBy delDevJar
+
+        tasks.register('copyAllArtifacts', Copy) {
+            from "$buildDir/libs"
+            into "$rootDir/artifacts"
+            include("*.jar")
+        }
+
+        build.finalizedBy(copyAllArtifacts)
     }
 }

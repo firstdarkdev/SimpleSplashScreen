@@ -25,10 +25,9 @@ If applicable, add screenshots to help explain your problem.
 
 **Versions (DO NOT USE "LATEST"! I STEAL YOUR KNEE CAPS!):**
 - Minecraft Version:
-- Forge Version:
+- Forge/NeoForge Version:
 - Java Version:
 - Mod Version:
-- Client Side [ ] / Server Side [ ]
 
 **Additional context**
 Add any other context about the problem here.

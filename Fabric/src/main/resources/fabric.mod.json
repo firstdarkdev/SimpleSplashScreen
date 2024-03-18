@@ -1,0 +1,32 @@
+{
+  "schemaVersion": 1,
+  "id": "${mod_id}",
+  "version": "${version}",
+  "name": "${mod_name}",
+  "description": "A mod that allows you to customize the Minecraft Loading Screen to your liking",
+  "authors": [
+    "${mod_author}"
+  ],
+  "contact": {
+    "homepage": "https://www.curseforge.com/minecraft/mc-mods/simple-splash-screen",
+    "sources": "https://github.com/Exploding-Creeper/SimpleSplashScreen"
+  },
+  "license": "MIT",
+  "icon": "assets/examplemod/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "com.hypherionmc.simplesplashscreen.SimpleSplashScreenFabric"
+    ]
+  },
+  "mixins": [
+    "simplesplashscreen.mixins.json",
+    "simplesplashscreen-fabric.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.14",
+    "fabric": "*",
+    "minecraft": "1.20.x",
+    "java": ">=17"
+  }
+}

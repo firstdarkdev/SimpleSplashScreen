@@ -1,0 +1,30 @@
+archivesBaseName = "${mod_name}-Common-${minecraft_version}"
+
+dependencies {
+    // Add your dependencies here
+    modImplementation("me.shedaniel.cloth:cloth-config-fabric:${cloth_config}") {
+        exclude(group: "net.fabricmc.fabric-api")
+    }
+}
+
+/**
+ * ===============================================================================
+ * =       DO NOT EDIT BELOW THIS LINE UNLESS YOU KNOW WHAT YOU ARE DOING        =
+ * ===============================================================================
+ */
+
+unimined.minecraft {
+    fabric {
+        loader fabric_loader
+    }
+
+    defaultRemapJar = false
+}
+
+processResources {
+    def buildProps = project.properties.clone()
+
+    filesMatching(['pack.mcmeta']) {
+        expand buildProps
+    }
+}

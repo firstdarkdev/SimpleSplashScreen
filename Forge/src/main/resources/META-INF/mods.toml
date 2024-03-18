@@ -1,0 +1,39 @@
+modLoader="javafml"
+loaderVersion="[48,)"
+license="MIT"
+issueTrackerURL="https://github.com/Exploding-Creeper/SimpleSplashScreen/issues" #optional
+
+[[mods]]
+modId="${mod_id}"
+version="${version}"
+displayName="${mod_name}"
+#updateJSONURL="https://change.me.example.invalid/updates.json"
+displayURL="https://www.curseforge.com/minecraft/mc-mods/simple-splash-screen" #optional
+logoFile="logo_light.png" #optional
+credits="Thanks to Motschen who made the original Fabric version of this mod" #optional
+authors="${mod_author}"
+description = '''
+A mod that allows you to customize the Minecraft Loading Screen to your liking
+'''
+displayTest="IGNORE_ALL_VERSION"
+
+[[dependencies.${mod_id}]]
+modId="forge"
+mandatory=true
+versionRange="[48,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId="minecraft"
+mandatory=true
+versionRange="[1.20.2,)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "cloth_config"
+mandatory = true
+versionRange = "*"
+ordering = "AFTER"
+side = "CLIENT"
