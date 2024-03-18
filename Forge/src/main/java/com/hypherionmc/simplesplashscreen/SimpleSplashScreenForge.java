@@ -1,6 +1,7 @@
 package com.hypherionmc.simplesplashscreen;
 
 import com.hypherionmc.simplesplashscreen.client.config.SimpleSplashScreenConfigGui;
+import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;

@@ -1,5 +1,5 @@
 modLoader="javafml"
-loaderVersion="[48,)"
+loaderVersion="[49,)"
 license="MIT"
 issueTrackerURL="https://github.com/Exploding-Creeper/SimpleSplashScreen/issues" #optional
 
@@ -20,14 +20,14 @@ displayTest="IGNORE_ALL_VERSION"
 [[dependencies.${mod_id}]]
 modId="forge"
 mandatory=true
-versionRange="[48,)"
+versionRange="[49,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="minecraft"
 mandatory=true
-versionRange="[1.20.2,)"
+versionRange="[1.20.4,)"
 ordering="NONE"
 side="BOTH"
 
