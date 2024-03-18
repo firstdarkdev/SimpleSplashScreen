@@ -4,6 +4,9 @@ pluginManagement {
         maven {
             url = "https://mcentral.firstdark.dev/releases"
         }
+        maven {
+            url "https://maven.firstdark.dev/releases"
+        }
         gradlePluginPortal() {
             content {
                 excludeGroup("org.apache.logging.log4j")
