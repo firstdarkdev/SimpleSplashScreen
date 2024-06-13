@@ -1,10 +1,16 @@
 pipeline {
     agent {
-        label "master"
-    }
-    tools {
-        jdk "JAVA17"
-    }
+        docker {
+            image "registry.firstdark.dev/java21:latest"
+            alwaysPull true
+            args '-v gradle-cache:/home/gradle/.gradle'
+       }
+   }
+
+   environment {
+       GRADLE_USER_HOME = '/home/gradle/.gradle'
+   }
+
     stages {
         stage("Notify Discord") {
             steps {
