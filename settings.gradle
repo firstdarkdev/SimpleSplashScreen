@@ -18,5 +18,4 @@ pluginManagement {
 rootProject.name = 'SimpleSplashScreen'
 include 'Common'
 //include 'Fabric'
-include 'Forge'
 include 'NeoForge'

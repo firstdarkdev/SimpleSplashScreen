@@ -1,23 +1,25 @@
 plugins {
     id 'java'
     id "xyz.wagyourtail.unimined" version "1.1.0-SNAPSHOT" apply false
-    id "com.hypherionmc.modutils.modpublisher" version "2.0.+" apply false
+    id "com.hypherionmc.modutils.modpublisher" version "2.1.+" apply false
+    id "com.hypherionmc.modutils.orion" version "1.0.+"
 }
 
-ext {
-    release = project.properties['release'] ?: false
-}
+orion.setup {
+    multiProject = true
+    enableMirrorMaven = true
+    enableReleasesMaven = true
+    enableSnapshotsMaven = true
 
-var base_version = "${version_major}.${version_minor}"
-var final_version = "${base_version}.${version_patch}"
+    dopplerToken = System.getenv("DOPPLER_KEY")
 
-// CI Support
-if (!release && System.getenv('BUILD_NUMBER') != null) {
-    final_version = "${base_version}.${System.getenv('BUILD_NUMBER')}d"
+    versioning {
+        var relType = project.properties["releaseType"] ?: "${release_type}"
+        identifier("${relType}")
+    }
 }
 
 group = project_group
-version = "${final_version}"
 
 subprojects {
     apply plugin: "xyz.wagyourtail.unimined"
@@ -28,16 +30,12 @@ subprojects {
     group = rootProject.group
     version = rootProject.version
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 
     // Add your maven repositories here
     repositories {
         mavenCentral()
-
-        maven {
-            url "https://mcentral.firstdark.dev/releases"
-        }
     }
 
     dependencies {
@@ -84,31 +82,5 @@ subprojects {
 
     tasks.withType(GenerateModuleMetadata) {
         enabled = false
-    }
-
-    clean {
-        delete "$rootDir/artifacts"
-    }
-
-    if (project.name !== 'Common') {
-        tasks.register('delDevJar') {
-            doLast {
-                def tree = fileTree('build/libs')
-                tree.include '**/*-dev-shadow.jar'
-                tree.include '**/*-dev.jar'
-                tree.include '**/*-all.jar'
-                tree.include '**/*-slim.jar'
-                tree.each { it.delete() }
-            }
-        }
-        build.finalizedBy delDevJar
-
-        tasks.register('copyAllArtifacts', Copy) {
-            from "$buildDir/libs"
-            into "$rootDir/artifacts"
-            include("*.jar")
-        }
-
-        build.finalizedBy(copyAllArtifacts)
     }
 }

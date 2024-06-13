@@ -49,7 +49,7 @@ public abstract class LoadingOverlayMixin {
 
     // Mod Fields
     @Unique
-    private static final ResourceLocation EMPTY_TEXTURE = new ResourceLocation("empty.png");
+    private static final ResourceLocation EMPTY_TEXTURE = ResourceLocation.parse("empty.png");
     @Unique
     private static ResourceLocation ASPECT_1to1_TEXTURE;
     @Unique
@@ -81,12 +81,12 @@ public abstract class LoadingOverlayMixin {
         }
 
         // Register Textures from Config
-        ASPECT_1to1_TEXTURE = new ResourceLocation(CS_CONFIG.textures.Aspect1to1Logo);
-        BOSS_BAR_TEXTURE = new ResourceLocation(CS_CONFIG.textures.BossBarTexture);
-        CUSTOM_PROGRESS_BAR_TEXTURE = new ResourceLocation(CS_CONFIG.textures.CustomBarTexture);
-        CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE = new ResourceLocation(CS_CONFIG.textures.CustomBarBackgroundTexture);
-        BACKGROUND_TEXTURE = new ResourceLocation(CS_CONFIG.textures.BackgroundTexture);
-        MOJANG_LOGO = new ResourceLocation(CS_CONFIG.textures.MojangLogo);
+        ASPECT_1to1_TEXTURE = ResourceLocation.parse(CS_CONFIG.textures.Aspect1to1Logo);
+        BOSS_BAR_TEXTURE = ResourceLocation.parse(CS_CONFIG.textures.BossBarTexture);
+        CUSTOM_PROGRESS_BAR_TEXTURE = ResourceLocation.parse(CS_CONFIG.textures.CustomBarTexture);
+        CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE = ResourceLocation.parse(CS_CONFIG.textures.CustomBarBackgroundTexture);
+        BACKGROUND_TEXTURE = ResourceLocation.parse(CS_CONFIG.textures.BackgroundTexture);
+        MOJANG_LOGO = ResourceLocation.parse(CS_CONFIG.textures.MojangLogo);
         arg.getTextureManager().register(MOJANG_LOGO, new FileBasedTexture(MOJANG_LOGO));
 
         // Set up GIF images

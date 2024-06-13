@@ -9,7 +9,7 @@ pipeline {
         stage("Notify Discord") {
             steps {
                 discordSend webhookURL: env.FDD_WH_ADMIN,
-                        title: "Deploy Started: Simple Splash Screen 1.20.4 Deploy #${BUILD_NUMBER}",
+                        title: "Deploy Started: Simple Splash Screen 1.21.0 Deploy #${BUILD_NUMBER}",
                         link: env.BUILD_URL,
                         result: 'SUCCESS',
                         description: "Build: [${BUILD_NUMBER}](${env.BUILD_URL})"
@@ -21,7 +21,7 @@ pipeline {
                 sh "./gradlew clean"
             }
         }
-        stage("Publish") {
+        stage("Publish to Modrinth/Curseforge") {
             steps {
                 sh "./gradlew publishMod -Prelease=true"
             }
@@ -33,7 +33,7 @@ pipeline {
             deleteDir()
 
             discordSend webhookURL: env.FDD_WH_ADMIN,
-                    title: "Simple Splash Screen 1.20.4 Deploy #${BUILD_NUMBER}",
+                    title: "Simple Splash Screen 1.21.0 Deploy #${BUILD_NUMBER}",
                     link: env.BUILD_URL,
                     result: currentBuild.currentResult,
                     description: "Build: [${BUILD_NUMBER}](${env.BUILD_URL})\nStatus: ${currentBuild.currentResult}"

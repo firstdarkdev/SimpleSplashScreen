@@ -45,7 +45,7 @@ public class GifTextureRenderer {
             for (int i = 0; i < frameCount; i++) {
                 BufferedImage frame = gifDecoder.getFrame(i);
                 if (frame != null) {
-                    ResourceLocation location = new ResourceLocation(textureID + "_frame_" + i);
+                    ResourceLocation location = ResourceLocation.parse(textureID + "_frame_" + i);
                     frames.put(i, new GifTexture(location, frame));
                 }
             }
@@ -60,7 +60,7 @@ public class GifTextureRenderer {
 
     public void registerFrames() {
         frames.forEach(((location, simpleTexture) ->  {
-            mc.getTextureManager().register(new ResourceLocation(textureID + "_frame_" + location), simpleTexture);
+            mc.getTextureManager().register(ResourceLocation.parse(textureID + "_frame_" + location), simpleTexture);
         }));
     }
 
@@ -78,7 +78,7 @@ public class GifTextureRenderer {
             }
 
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
-            stack.blit(new ResourceLocation(textureID + "_frame_" + currentFrame), 0, 0, 0, 0, 0, maxX, maxY, maxX, maxY);
+            stack.blit(ResourceLocation.parse(textureID + "_frame_" + currentFrame), 0, 0, 0, 0, 0, maxX, maxY, maxX, maxY);
             RenderSystem.defaultBlendFunc();
         }
     }
@@ -100,7 +100,7 @@ public class GifTextureRenderer {
             RenderSystem.blendEquation(32774);
             RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
             RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
-            stack.blit(new ResourceLocation(textureID + "_frame_" + currentFrame), maxX, maxY, width, height, 0, 512 - clip, 512, 512, 512, 512);
+            stack.blit(ResourceLocation.parse(textureID + "_frame_" + currentFrame), maxX, maxY, width, height, 0, 512 - clip, 512, 512, 512, 512);
             RenderSystem.defaultBlendFunc();
             RenderSystem.disableBlend();
         }
@@ -108,7 +108,7 @@ public class GifTextureRenderer {
 
     public void unloadAll() {
         frames.forEach(((location, simpleTexture) ->  {
-            mc.getTextureManager().release(new ResourceLocation(textureID + "_frame_" + location));
+            mc.getTextureManager().release(ResourceLocation.parse(textureID + "_frame_" + location));
         }));
         frames.clear();
     }

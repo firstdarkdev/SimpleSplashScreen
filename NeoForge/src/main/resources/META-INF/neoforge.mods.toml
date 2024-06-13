@@ -1,7 +1,7 @@
 modLoader="javafml"
-loaderVersion="[49,)"
+loaderVersion="[1,)"
 license="MIT"
-issueTrackerURL="https://github.com/Exploding-Creeper/SimpleSplashScreen/issues" #optional
+issueTrackerURL="https://github.com/Exploding-Creeper/SimpleSplashScreen/issues"
 
 [[mods]]
 modId="${mod_id}"
@@ -18,22 +18,22 @@ A mod that allows you to customize the Minecraft Loading Screen to your liking
 displayTest="IGNORE_ALL_VERSION"
 
 [[dependencies.${mod_id}]]
-modId="forge"
-mandatory=true
-versionRange="[49,)"
+modId="neoforge"
+type="required"
+versionRange="[21.0.0-beta,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId="minecraft"
-mandatory=true
-versionRange="[1.20.4,)"
+type="required"
+versionRange="[1.21,)"
 ordering="NONE"
 side="BOTH"
 
 [[dependencies.${mod_id}]]
 modId = "cloth_config"
-mandatory = true
+type="required"
 versionRange = "*"
 ordering = "AFTER"
 side = "CLIENT"
