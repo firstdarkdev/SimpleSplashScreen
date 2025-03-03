@@ -47,7 +47,7 @@ publisher {
     setChangelog("https://raw.githubusercontent.com/hypherionmc/changelogs/main/simplesplash/changelog.md")
     setVersion("${minecraft_version}-${project.version}")
     setDisplayName("[${minecraft_version} NeoForge] Simple Splash Screen - ${project.version}")
-    setGameVersions("${minecraft_version}")
+    setGameVersions("1.21", "1.21.1")
     setLoaders("neoforge")
     setCurseEnvironment("client")
     setArtifact(remapJar)

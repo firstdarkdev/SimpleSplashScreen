@@ -2,8 +2,8 @@ def projectName = "Simple Splash Screen";
 def projectIcon = "https://cdn.modrinth.com/data/4uhcFYch/c6747095aa807a3603c27afb60971ca1f2760a85.png";
 def JDK = "21";
 def majorMc = "1.21";
-def modLoaders = "neoforge|fabric|quilt";
-def supportedMc = "1.21";
+def modLoaders = "neoforge";
+def supportedMc = "1.21|1.21.1";
 def reltype = "snapshot";
 
 pipeline {
