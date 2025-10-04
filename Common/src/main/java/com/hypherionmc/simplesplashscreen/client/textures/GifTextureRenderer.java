@@ -2,12 +2,11 @@ package com.hypherionmc.simplesplashscreen.client.textures;
 
 import com.hypherionmc.simplesplashscreen.SimpleSplashScreenCommon;
 import com.hypherionmc.simplesplashscreen.client.util.GifDecoder;
-import com.mojang.blaze3d.platform.GlStateManager;
-import com.mojang.blaze3d.systems.RenderSystem;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.renderer.texture.SimpleTexture;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ARGB;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
@@ -22,22 +21,23 @@ import java.util.Random;
  */
 public class GifTextureRenderer {
 
-    private HashMap<Integer, SimpleTexture> frames;
+    private HashMap<Integer, GifTextureHolder> frames;
     private int frameCount;
     private int currentFrame;
-    private final Minecraft mc;
+    private final TextureManager mc;
     private int tick = 5;
-    private final int textureID;
 
-    public GifTextureRenderer(String texture, Minecraft minecraft) {
+    public GifTextureRenderer(String texture, TextureManager minecraft) {
         this.mc = minecraft;
-        textureID = new Random().nextInt();
+        int textureID = new Random().nextInt();
 
         try {
             InputStream input = new FileInputStream(new File(SimpleSplashScreenCommon.CONFIG_PATH, texture));
             GifDecoder gifDecoder = new GifDecoder();
-            gifDecoder.read(input);
+            int status = gifDecoder.read(input);
+            SimpleSplashScreenCommon.LOGGER.info("Status of gif {}: {}", texture, status);
             frameCount = gifDecoder.getFrameCount();
+            SimpleSplashScreenCommon.LOGGER.info("Found {} frames in gif {}", frameCount, texture);
 
             currentFrame = 0;
             frames = new HashMap<>();
@@ -46,12 +46,12 @@ public class GifTextureRenderer {
                 BufferedImage frame = gifDecoder.getFrame(i);
                 if (frame != null) {
                     ResourceLocation location = ResourceLocation.parse(textureID + "_frame_" + i);
-                    frames.put(i, new GifTexture(location, frame));
+                    frames.put(i, new GifTextureHolder(location, new GifTexture(location, frame)));
                 }
             }
 
             frameCount = frames.size();
-
+            SimpleSplashScreenCommon.LOGGER.info("Loaded {} frames from gif {}", frameCount, texture);
         } catch (Exception e) {
             SimpleSplashScreenCommon.LOGGER.error("Failed to decode gif {}", texture, e);
         }
@@ -59,9 +59,7 @@ public class GifTextureRenderer {
     }
 
     public void registerFrames() {
-        frames.forEach(((location, simpleTexture) ->  {
-            mc.getTextureManager().register(ResourceLocation.parse(textureID + "_frame_" + location), simpleTexture);
-        }));
+        frames.forEach(((location, simpleTexture) -> mc.registerAndLoad(simpleTexture.location(), simpleTexture.texture())));
     }
 
     public void renderNextFrame(GuiGraphics stack, int maxX, int maxY, float alpha) {
@@ -77,9 +75,9 @@ public class GifTextureRenderer {
                 tick = 0;
             }
 
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
-            stack.blit(ResourceLocation.parse(textureID + "_frame_" + currentFrame), 0, 0, 0, 0, 0, maxX, maxY, maxX, maxY);
-            RenderSystem.defaultBlendFunc();
+            GifTextureHolder holder = frames.get(currentFrame);
+            int color = ARGB.colorFromFloat(alpha, 1.0f, 1.0f, 1.0f);
+            stack.blit(RenderPipelines.GUI_TEXTURED, holder.location(), 0, 0, 0f, 0f, maxX, maxY, maxX, maxY, color);
         }
     }
 
@@ -96,19 +94,15 @@ public class GifTextureRenderer {
                 tick = 0;
             }
 
-            RenderSystem.enableBlend();
-            RenderSystem.blendEquation(32774);
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, alpha);
-            stack.blit(ResourceLocation.parse(textureID + "_frame_" + currentFrame), maxX, maxY, width, height, 0, 512 - clip, 512, 512, 512, 512);
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.disableBlend();
+            GifTextureHolder holder = frames.get(currentFrame);
+            int color = ARGB.colorFromFloat(alpha, 1.0f, 1.0f, 1.0f);
+            stack.blit(RenderPipelines.GUI_TEXTURED, holder.location(), maxX, maxY, 0, 512 - clip, width, height, 512, 512, 512, 512, color);
         }
     }
 
     public void unloadAll() {
         frames.forEach(((location, simpleTexture) ->  {
-            mc.getTextureManager().release(ResourceLocation.parse(textureID + "_frame_" + location));
+            mc.release(simpleTexture.location());
         }));
         frames.clear();
     }

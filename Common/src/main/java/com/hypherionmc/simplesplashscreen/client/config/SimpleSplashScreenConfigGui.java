@@ -102,7 +102,7 @@ public class SimpleSplashScreenConfigGui {
 
         private void showPreviewScreen(SimpleSplashScreenConfig oldConfig) {
             SimpleSplashScreenCommon.CS_CONFIG = getConfig();
-            LoadingOverlay.registerTextures(Minecraft.getInstance());
+            LoadingOverlay.registerTextures(Minecraft.getInstance().getTextureManager());
             Minecraft.getInstance().setOverlay(new ReloadPreviewScreen(500, () -> SimpleSplashScreenCommon.CS_CONFIG = oldConfig));
         }
 

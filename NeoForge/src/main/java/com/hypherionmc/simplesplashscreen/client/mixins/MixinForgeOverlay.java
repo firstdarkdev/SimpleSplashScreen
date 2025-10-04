@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.LoadingOverlay;
 import net.minecraft.server.packs.resources.ReloadInstance;
+import net.neoforged.fml.earlydisplay.DisplayWindow;
 import net.neoforged.neoforge.client.loading.NeoForgeLoadingOverlay;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -20,8 +21,8 @@ import java.util.function.Consumer;
 @Mixin(NeoForgeLoadingOverlay.class)
 public class MixinForgeOverlay extends LoadingOverlay {
 
-    public MixinForgeOverlay(Minecraft p_96172_, ReloadInstance p_96173_, Consumer<Optional<Throwable>> p_96174_, boolean p_96175_) {
-        super(p_96172_, p_96173_, p_96174_, p_96175_);
+    public MixinForgeOverlay(Minecraft mc, ReloadInstance reloader, Consumer<Optional<Throwable>> errorConsumer, DisplayWindow displayWindow) {
+        super(mc, reloader, errorConsumer, false);
     }
 
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)

@@ -4,18 +4,17 @@ import com.hypherionmc.simplesplashscreen.SimpleSplashScreenCommon;
 import com.hypherionmc.simplesplashscreen.client.config.SimpleSplashScreenConfig;
 import com.hypherionmc.simplesplashscreen.client.textures.FileBasedTexture;
 import com.hypherionmc.simplesplashscreen.client.textures.GifTextureRenderer;
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.LoadingOverlay;
-import net.minecraft.client.gui.screens.Overlay;
-import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.PanoramaRenderer;
+import net.minecraft.client.renderer.RenderPipelines;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ReloadInstance;
-import net.minecraft.util.FastColor;
+import net.minecraft.util.ARGB;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -73,7 +72,7 @@ public abstract class LoadingOverlayMixin {
      * Here we inject to register our custom textures and set up the default textures
      */
     @Inject(method = "registerTextures", at = @At("TAIL"), cancellable = true)
-    private static void injectTextures(Minecraft arg, CallbackInfo ci) {
+    private static void injectTextures(TextureManager arg, CallbackInfo ci) {
         // Set up the main textures, config etc. This is done once to prevent cloth config errors
         if (!SimpleSplashScreenCommon.initDone) {
             SimpleSplashScreenCommon.init();
@@ -87,26 +86,26 @@ public abstract class LoadingOverlayMixin {
         CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE = ResourceLocation.parse(CS_CONFIG.textures.CustomBarBackgroundTexture);
         BACKGROUND_TEXTURE = ResourceLocation.parse(CS_CONFIG.textures.BackgroundTexture);
         MOJANG_LOGO = ResourceLocation.parse(CS_CONFIG.textures.MojangLogo);
-        arg.getTextureManager().register(MOJANG_LOGO, new FileBasedTexture(MOJANG_LOGO));
+        arg.registerAndLoad(MOJANG_LOGO, new FileBasedTexture(MOJANG_LOGO));
 
         // Set up GIF images
         if (ASPECT_1to1_TEXTURE.getPath().endsWith(".gif")) {
             logoGifRenderer = new GifTextureRenderer(CS_CONFIG.textures.Aspect1to1Logo, arg);
             logoGifRenderer.registerFrames();
         } else {
-            arg.getTextureManager().register(ASPECT_1to1_TEXTURE, new FileBasedTexture(ASPECT_1to1_TEXTURE));
+            arg.registerAndLoad(ASPECT_1to1_TEXTURE, new FileBasedTexture(ASPECT_1to1_TEXTURE));
         }
 
         if (BACKGROUND_TEXTURE.getPath().endsWith("gif")) {
             backgroundGifRenderer = new GifTextureRenderer(CS_CONFIG.textures.BackgroundTexture, arg);
             backgroundGifRenderer.registerFrames();
         } else {
-            arg.getTextureManager().register(BACKGROUND_TEXTURE, new FileBasedTexture(BACKGROUND_TEXTURE));
+            arg.registerAndLoad(BACKGROUND_TEXTURE, new FileBasedTexture(BACKGROUND_TEXTURE));
         }
 
         // Register Progress bar textures
-        arg.getTextureManager().register(CUSTOM_PROGRESS_BAR_TEXTURE, new FileBasedTexture(CUSTOM_PROGRESS_BAR_TEXTURE));
-        arg.getTextureManager().register(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE, new FileBasedTexture(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE));
+        arg.registerAndLoad(CUSTOM_PROGRESS_BAR_TEXTURE, new FileBasedTexture(CUSTOM_PROGRESS_BAR_TEXTURE));
+        arg.registerAndLoad(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE, new FileBasedTexture(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE));
 
         // We're done, so we return
         ci.cancel();
@@ -118,7 +117,7 @@ public abstract class LoadingOverlayMixin {
      */
     @Inject(method = "render", at = @At("HEAD"), cancellable = true)
     private void injectRender(GuiGraphics arg, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
-        // Cancel the rendering completely, so that we can handle it
+        // Cancel the rendering completely so that we can handle it
         ci.cancel();
 
         int width = arg.guiWidth();
@@ -135,27 +134,29 @@ public abstract class LoadingOverlayMixin {
 
         if (fadeOutTime >= 1.0F) {
             if (this.minecraft.screen != null) {
-                this.minecraft.screen.render(arg, mouseX, mouseY, partialTicks);
+                this.minecraft.screen.renderWithTooltipAndSubtitles(arg, 0, 0, partialTicks);
+            } else {
+                this.minecraft.gui.renderDeferredSubtitles();
             }
 
             int alpha = Mth.ceil((1.0F - Mth.clamp(fadeOutTime - 1.0F, 0.0F, 1.0F)) * 255.0F);
-            arg.fill(RenderType.guiOverlay(), 0, 0, width, height, changeAlpha(getBGColor(), alpha));
+            arg.nextStratum();
+            arg.fill(0, 0, width, height, changeAlpha(getBGColor(), alpha));
             timedAlpha = 1.0F - Mth.clamp(fadeOutTime - 1.0F, 0.0F, 1.0F);
         } else if (this.fadeIn) {
             if (this.minecraft.screen != null && fadeInTime < 1.0F) {
-                this.minecraft.screen.render(arg, mouseX, mouseY, partialTicks);
+                this.minecraft.screen.renderWithTooltipAndSubtitles(arg, mouseX, mouseY, partialTicks);
+            } else {
+                this.minecraft.gui.renderDeferredSubtitles();
             }
 
-            int alpha = Mth.ceil(Mth.clamp((double)fadeInTime, 0.15, 1.0) * 255.0);
-            arg.fill(RenderType.guiOverlay(), 0, 0, width, height, changeAlpha(getBGColor(), alpha));
+            int alpha = Mth.ceil(Mth.clamp(fadeInTime, 0.15, 1.0) * 255.0);
+            arg.nextStratum();
+            arg.fill(0, 0, width, height, changeAlpha(getBGColor(), alpha));
             timedAlpha = Mth.clamp(fadeInTime, 0.0F, 1.0F);
         } else {
             int color = getBGColor();
-            float r = (float)(color >> 16 & 255) / 255.0F;
-            float g = (float)(color >> 8 & 255) / 255.0F;
-            float b = (float)(color & 255) / 255.0F;
-            GlStateManager._clearColor(r, g, b, 1.0F);
-            GlStateManager._clear(16384, Minecraft.ON_OSX);
+            RenderSystem.getDevice().createCommandEncoder().clearColorTexture(this.minecraft.getMainRenderTarget().getColorTexture(), color);
             timedAlpha = 1.0F;
         }
 
@@ -164,20 +165,14 @@ public abstract class LoadingOverlayMixin {
             if (backgroundGifRenderer != null) {
                 backgroundGifRenderer.renderNextFrame(arg, width, height, timedAlpha);
             } else {
-                RenderSystem.enableBlend();
-                RenderSystem.blendEquation(32774);
-                RenderSystem.blendFunc(770, 1);
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, timedAlpha);
-                arg.blit(BACKGROUND_TEXTURE, 0, 0, 0, 0, 0, width, height, width, height);
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.disableBlend();
+                int color = ARGB.colorFromFloat(timedAlpha, 1.0f, 1.0f, 1.0f);
+                arg.blit(RenderPipelines.GUI_TEXTURED, BACKGROUND_TEXTURE, 0, 0, 0f, 0f, width, height, width, height, color);
             }
         }
 
         int scaledWidth = (int)((double)arg.guiWidth() * 0.5);
         int scaledHeight = (int)((double)arg.guiHeight() * 0.5);
-        double scale = Math.min((double)arg.guiWidth() * 0.75, (double)arg.guiHeight()) * 0.25;
+        double scale = Math.min((double)arg.guiWidth() * 0.75, arg.guiHeight()) * 0.25;
         int i1 = (int)(scale * 0.5);
         double d0 = scale * 4.0;
         int j1 = (int)(d0 * 0.5);
@@ -193,18 +188,8 @@ public abstract class LoadingOverlayMixin {
         // Logo Hook
         if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Mojang) {
             // Mojang Logo
-            RenderSystem.disableDepthTest();
-            RenderSystem.depthMask(false);
-            RenderSystem.enableBlend();
-            RenderSystem.blendFunc(770, 1);
-            arg.setColor(1.0F, 1.0F, 1.0F, timedAlpha);
-            arg.blit(MOJANG_LOGO, scaledWidth - j1, scaledHeight - i1, j1, (int)scale, -0.0625F, 0.0F, 120, 60, 120, 120);
-            arg.blit(MOJANG_LOGO, scaledWidth, scaledHeight - i1, j1, (int)scale, 0.0625F, 60.0F, 120, 60, 120, 120);
-            arg.setColor(1.0F, 1.0F, 1.0F, 1.0F);
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.disableBlend();
-            RenderSystem.depthMask(true);
-            RenderSystem.enableDepthTest();
+            arg.blit(RenderPipelines.MOJANG_LOGO, MOJANG_LOGO, scaledWidth - j1, scaledHeight - i1, -0.0625F, 0.0F, j1, (int)scale, 120, 60, 120, 120, ARGB.white(timedAlpha));
+            arg.blit(RenderPipelines.MOJANG_LOGO, MOJANG_LOGO, scaledWidth, scaledHeight - i1, 0.0625F, 60.0F, j1, (int)scale, 120, 60, 120, 120, ARGB.white(timedAlpha));
         } else if (CS_CONFIG.logoStyle == SimpleSplashScreenConfig.LogoStyle.Aspect1to1 && CS_CONFIG.progressBarType != SimpleSplashScreenConfig.ProgressBarType.Logo) {
             // Custom Logo
             renderLogo(arg, timedAlpha, 1);
@@ -212,7 +197,7 @@ public abstract class LoadingOverlayMixin {
 
         // Return to Mojang Code
         if (fadeOutTime >= 2.0F) {
-            this.minecraft.setOverlay((Overlay)null);
+            this.minecraft.setOverlay(null);
         }
 
         if (this.fadeOutStart == -1L && this.reload.isDone() && (!this.fadeIn || fadeInTime >= 2.0F)) {
@@ -241,21 +226,16 @@ public abstract class LoadingOverlayMixin {
             // Bossbar Progress Bar
             if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.BossBar) {
                 int color = CS_CONFIG.bossBarColor.ordinal() * 10;
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-
                 int overlay = 70 + CS_CONFIG.bossBarType.ordinal() * 10;
                 int width = (int) ((x2 - x1) * (85 * 0.01f));
                 int offset = ((x2 - x1) - width) / 2;
                 i = Mth.ceil((float)(width - 2) * this.currentProgress);
 
-                arg.blit(BOSS_BAR_TEXTURE, x1 + offset, y1 + 1, width, (int) ((width / 182f) * 5), 0, color, 182, 5,256, 256);
-                arg.blit(BOSS_BAR_TEXTURE, x1 + offset, y1 + 1, i, (int) ((width / 182f) * 5), 0, color+5, (int) (180 * this.currentProgress), 5, 256, 256);
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
+                arg.blit(RenderPipelines.GUI_TEXTURED, BOSS_BAR_TEXTURE, x1 + offset, y1 + 1, 0, color, width, (int) ((width / 182f) * 5), 182, 5,256, 256);
+                arg.blit(RenderPipelines.GUI_TEXTURED, BOSS_BAR_TEXTURE, x1 + offset, y1 + 1, 0, color+5, i, (int) ((width / 182f) * 5), (int) (180 * this.currentProgress), 5, 256, 256);
                 if (overlay != 120) {
-                    arg.blit(BOSS_BAR_TEXTURE, x1 + offset, y1 + 1, width, (int) ((width / 182f) * 5), 0, overlay, 182, 5,256, 256);
+                    arg.blit(RenderPipelines.GUI_OPAQUE_TEXTURED_BACKGROUND, BOSS_BAR_TEXTURE, x1 + offset, y1 + 1, 0, overlay, width, (int) ((width / 182f) * 5), 182, 5,256, 256);
                 }
-                RenderSystem.disableBlend();
             }
 
             // Custom Progress Bar
@@ -263,13 +243,12 @@ public abstract class LoadingOverlayMixin {
                 int regionWidth = CS_CONFIG.customProgressBarMode == SimpleSplashScreenConfig.ProgressBarMode.Stretch ? x2 - x1 : i;
                 int height = (int) (((x2 - x1) / 400f) * 10);
                 int u = CS_CONFIG.customProgressBarMode.equals(SimpleSplashScreenConfig.ProgressBarMode.Slide) ? x2 - x1 - i : 0;
+                int color = ARGB.colorFromFloat(opacity, 1.0f, 1.0f, 1.0f);
                 if (CS_CONFIG.customProgressBarBackground) {
-                    RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                    arg.blit(CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE, x1, y1, x2 - x1, height, 0, 0, x2 - x1, height, x2 - x1, height);
+                    arg.blit(RenderPipelines.GUI_TEXTURED, CUSTOM_PROGRESS_BAR_BACKGROUND_TEXTURE, x1, y1,0, 0, x2 - x1, height, x2 - x1, height, x2 - x1, height, color);
                 }
 
-                RenderSystem.setShader(GameRenderer::getPositionTexShader);
-                arg.blit(CUSTOM_PROGRESS_BAR_TEXTURE, x1, y1, i, height, u, 0, regionWidth, height, x2 - x1, height);
+                arg.blit(RenderPipelines.GUI_TEXTURED, CUSTOM_PROGRESS_BAR_TEXTURE, x1, y1, u, 0, i, height, regionWidth, height, x2 - x1, height, color);
             }
 
             // Vanilla / With Color progress bar
@@ -286,9 +265,9 @@ public abstract class LoadingOverlayMixin {
             }
 
         } else if (CS_CONFIG.progressBarType == SimpleSplashScreenConfig.ProgressBarType.Logo) {
-            renderLogo(arg, 1.0F, currentProgress);
+            renderLogo(arg, opacity, currentProgress);
         } else {
-            renderBackgroundBar(arg, 1.0F, currentProgress);
+            renderBackgroundBar(arg, opacity, currentProgress);
         }
     }
 
@@ -308,13 +287,8 @@ public abstract class LoadingOverlayMixin {
         if (logoGifRenderer != null) {
             logoGifRenderer.renderNextFrame(matrixStack, m - (s / 2), (r + s) - prog, s, s, o, lastHeight);
         } else {
-            RenderSystem.enableBlend();
-            RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-            RenderSystem.setShader(GameRenderer::getPositionTexShader);
-            RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
-            matrixStack.blit(ASPECT_1to1_TEXTURE, m - (s / 2), (r + s) - prog, s, s, 0, 512 - lastHeight, 512, 512, 512, 512);
-            RenderSystem.defaultBlendFunc();
-            RenderSystem.disableBlend();
+            int color = ARGB.colorFromFloat(o, 1.0f, 1.0f, 1.0f);
+            matrixStack.blit(RenderPipelines.GUI_TEXTURED, ASPECT_1to1_TEXTURE, m - (s / 2), (r + s) - prog, 0, 512 - lastHeight, s, s, 512, 512, 512, 512, color);
         }
     }
 
@@ -330,14 +304,8 @@ public abstract class LoadingOverlayMixin {
         double e = d * 4.0D;
         int s = (int)(e * 0.5D);
         lastWidth = Math.max(Math.round(currentProgress * maxX), lastWidth);
-
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.setShader(GameRenderer::getPositionTexShader);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, o);
-        matrixStack.blit(CUSTOM_PROGRESS_BAR_TEXTURE, 0, 0, 0, 0, 0, lastWidth, maxY, maxX, maxY);
-        RenderSystem.defaultBlendFunc();
-        RenderSystem.disableBlend();
+        int color = ARGB.colorFromFloat(o, 1.0f, 1.0f, 1.0f);
+        matrixStack.blit(RenderPipelines.GUI_TEXTURED, CUSTOM_PROGRESS_BAR_TEXTURE, 0, 0, 0, 0, lastWidth, maxY, maxX, maxY, color);
     }
 
     // Helper Methods
@@ -348,6 +316,6 @@ public abstract class LoadingOverlayMixin {
 
     @Unique
     private static int getBGColor() {
-        return CS_CONFIG.backgroundImage ? FastColor.ARGB32.color(0, 0, 0, 0) : CS_CONFIG.backgroundColor;
+        return CS_CONFIG.backgroundImage ? ARGB.color(0, 0, 0, 0) : CS_CONFIG.backgroundColor;
     }
 }

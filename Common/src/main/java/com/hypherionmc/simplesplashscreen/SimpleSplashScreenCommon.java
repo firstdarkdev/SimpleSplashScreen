@@ -47,7 +47,7 @@ public class SimpleSplashScreenCommon {
                 try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(path.getFileName().toString())) {
                     Files.copy(is, path, StandardCopyOption.REPLACE_EXISTING);
                 } catch (Exception e) {
-                    LOGGER.error("Failed to load resource " + path.getFileName().toString(), e);
+                    LOGGER.error("Failed to load resource {}", path.getFileName().toString(), e);
                 }
             }
         }

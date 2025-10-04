@@ -2,6 +2,7 @@ package com.hypherionmc.simplesplashscreen.client.textures;
 
 import com.mojang.blaze3d.platform.NativeImage;
 import lombok.Getter;
+import net.minecraft.client.renderer.texture.TextureContents;
 import net.minecraft.client.resources.metadata.texture.TextureMetadataSection;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -32,20 +33,20 @@ public class GifTexture extends FileBasedTexture {
 
     @NotNull
     @Override
-    protected TextureImage getTextureImage(ResourceManager arg) {
+    public TextureContents loadContents(ResourceManager arg) {
         try {
-            TextureImage texture;
+            TextureContents texture;
 
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             ImageIO.write(image, "png", os);
 
             try (InputStream is = new ByteArrayInputStream(os.toByteArray())) {
-                texture = new TextureImage(new TextureMetadataSection(true, true), NativeImage.read(is));
+                texture = new TextureContents(NativeImage.read(is), new TextureMetadataSection(true, true));
             }
 
             return texture;
         } catch (IOException var18) {
-            return new TextureImage(var18);
+            return TextureContents.createMissing();
         }
     }
 }

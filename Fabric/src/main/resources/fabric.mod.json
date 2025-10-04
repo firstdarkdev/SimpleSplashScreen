@@ -9,10 +9,10 @@
   ],
   "contact": {
     "homepage": "https://www.curseforge.com/minecraft/mc-mods/simple-splash-screen",
-    "sources": "https://github.com/Exploding-Creeper/SimpleSplashScreen"
+    "sources": "https://github.com/firstdarkdev/SimpleSplashScreen"
   },
   "license": "MIT",
-  "icon": "assets/examplemod/icon.png",
+  "icon": "logo_light.png",
   "environment": "*",
   "entrypoints": {
     "client": [
@@ -26,7 +26,7 @@
   "depends": {
     "fabricloader": ">=0.14",
     "fabric": "*",
-    "minecraft": "1.20.x",
+    "minecraft": "1.21.x",
     "java": ">=17"
   }
 }

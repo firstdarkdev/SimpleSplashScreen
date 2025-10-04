@@ -15,7 +15,7 @@ import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
 public class SimpleSplashScreenNeoForge {
 
     public SimpleSplashScreenNeoForge(IEventBus modEventBus) {
-       if (FMLEnvironment.dist.isClient()) {
+       if (FMLEnvironment.getDist().isClient()) {
            ModList.get().getModContainerById("simplesplashscreen").ifPresent(c -> {
                c.registerExtensionPoint(IConfigScreenFactory.class, ((minecraft, screen) -> SimpleSplashScreenConfigGui.getConfigScreen(screen)));
            });
